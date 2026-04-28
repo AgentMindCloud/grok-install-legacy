@@ -1,0 +1,13 @@
+name = "grok-install-api"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+PRODUCT_NAME = "grok-install"
+GITHUB_OWNER_ORG = "AgentMindCloud"
+PUBLIC_BASE_URL = "https://agentmindcloud.github.io/grok-install"
+
+[[kv_namespaces]]
+binding = "GROK_INSTALL_KV"
+id = "11d7541c50c84a83ae02891e9e908726"
