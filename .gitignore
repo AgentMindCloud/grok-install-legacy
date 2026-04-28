@@ -1,54 +1,13 @@
-# Phase / planning / progress scratch files
-PHASE-*.md
-*PHASE*.md
-*phase*.md
-*[Pp][Hh][Aa][Ss][Ee]*.md
-**/PHASE-*/
-**/phase-*/
-
-# Build artifacts
-build/
-dist/
-out/
-target/
-*.egg-info/
-
-# Node
 node_modules/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
-
-# Coverage & test output
-coverage/
-.coverage
-.pytest_cache/
-.tox/
-
-# Logs & temp
-*.log
-*.tmp
-*.cache
-
-# Environment / secrets
 .env
-.env.*
-!.env.example
-*.pem
-*.key
-serviceAccount*.json
-credentials*.json
-
-# OS files
+.env.local
+.dev.vars
+.wrangler/
+*.log
+dist/
+_assets/
+.cf-subdomain
+.worker-url
+LAUNCH.md
+BUILD-PLAN.md
 .DS_Store
-Thumbs.db
-
-# Editor / IDE
-.vscode/
-.idea/
-*.swp
-*.swo
