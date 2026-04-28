@@ -168,6 +168,13 @@ export async function handleMint(request, env) {
     return error('GitHub not connected. Visit /auth/github/start first.', 401);
   }
 
+  const MINT_COOLDOWN_MS = 60 * 1000;
+  const lastMintAt = session.lastMintAt ? Date.parse(session.lastMintAt) : 0;
+  if (lastMintAt && (Date.now() - lastMintAt) < MINT_COOLDOWN_MS) {
+    const waitMs = MINT_COOLDOWN_MS - (Date.now() - lastMintAt);
+    return error(`Slow down — please wait ${Math.ceil(waitMs / 1000)}s before minting again.`, 429);
+  }
+
   const agentName = String(body.agentName || '').trim();
   const agentHandle = String(body.agentHandle || '').trim().replace(/^@/, '');
   const mascotStyle = body.mascotStyle || 'specimen_plate';
@@ -280,8 +287,13 @@ export async function handleMint(request, env) {
 
   try { await bumpDailyCounter(env); } catch (e) { console.warn('daily counter bump failed', e); }
 
+  try {
+    session.lastMintAt = mintedAt;
+    await saveSession(env, sessionId, session);
+  } catch (e) { console.warn('session lastMintAt update failed', e); }
+
   const tweetText = `Just minted my AI agent @${agentHandle} with grok-install. Genesis ${genesisId}.\n\n@grok install ${repo.html_url}`;
-  const dashboardUrl = `${env.PUBLIC_BASE_URL}/dashboard.html?session=${sessionId}&genesis=${genesisId}`;
+  const dashboardUrl = `${env.PUBLIC_BASE_URL}/dashboard.html?genesis=${genesisId}`;
 
   return json({
     genesisId,

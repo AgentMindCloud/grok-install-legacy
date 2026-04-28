@@ -1101,12 +1101,20 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+let _sessionExpiredNotified = false;
 async function safeFetch(url, opts) {
   try {
     const res = await fetch(url, opts);
     if (!res.ok) {
       let body = null;
       try { body = await res.json(); } catch {}
+      if (res.status === 401 && !_sessionExpiredNotified) {
+        _sessionExpiredNotified = true;
+        toast('Session expired — please sign in again.', 'error');
+        setTimeout(() => {
+          window.location.href = WORKER_URL + '/auth/x/start?return=dashboard';
+        }, 2000);
+      }
       return { ok: false, status: res.status, body };
     }
     const ct = res.headers.get('content-type') || '';
@@ -1260,9 +1268,18 @@ function wireSidebar() {
 
 // ---------- Sign out ----------
 function wireSignOut() {
-  $('#signout-btn').addEventListener('click', (e) => {
+  $('#signout-btn').addEventListener('click', async (e) => {
     e.preventDefault();
     sessionStorage.removeItem('grok_agent');
+    if (SESSION_ID) {
+      try {
+        await fetch(WORKER_URL + '/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: SESSION_ID }),
+        });
+      } catch (err) { console.warn('logout fetch failed', err); }
+    }
     window.location.href = '/safe-agent-builder.html';
   });
 }

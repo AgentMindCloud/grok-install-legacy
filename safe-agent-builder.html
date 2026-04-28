@@ -1858,13 +1858,13 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           </div>
           <div class="field">
             <div class="field-label">Agent name</div>
-            <input type="text" value="JanSol0sAI">
+            <input type="text" name="agent-name" value="JanSol0sAI">
           </div>
           <div class="field">
             <div class="field-label">Agent's X handle</div>
             <div class="handle-input" style="max-width: 380px;">
               <span class="prefix">x.com/@</span>
-              <input type="text" value="JanSol0sAI" style="width: 100%;">
+              <input type="text" name="agent-handle" value="JanSol0sAI" style="width: 100%;">
             </div>
             <div class="limit-help" style="margin-top: 8px;">This is the X account where your agent will live and reply from. Create it on x.com first if you haven't.</div>
           </div>
@@ -1990,7 +1990,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           </div>
           <div class="field">
             <div class="field-label">Agent name</div>
-            <input type="text" value="DogeDoughAI">
+            <input type="text" name="agent-name" value="DogeDoughAI">
           </div>
           <div class="field">
             <div class="field-label">Description</div>
@@ -2523,11 +2523,12 @@ function wireMintButtons() {
       const original = btn.innerHTML;
       const flow = getActiveFlow();
       const panel = document.querySelector('.flow-panel.active') || document;
-      const nameInput = panel.querySelector('input[type="text"]');
-      const handleInput = panel.querySelectorAll('.handle-input input');
+      const nameField = panel.querySelector('input[name="agent-name"]');
+      const handleField = panel.querySelector('input[name="agent-handle"]');
       const optInChecked = panel.querySelector('input[type="checkbox"]:checked');
-      const agentName = nameInput ? nameInput.value.trim() : 'MyAgent';
-      const agentHandle = (handleInput && handleInput[0] ? handleInput[0].value.trim() : agentName).replace(/^@/, '');
+      const agentName = (nameField ? nameField.value : '').trim() || 'MyAgent';
+      const rawHandle = (handleField ? handleField.value : '').trim();
+      const agentHandle = (rawHandle || agentName).replace(/^@/, '');
       const body = {
         sessionId: SESSION_ID,
         agentName,

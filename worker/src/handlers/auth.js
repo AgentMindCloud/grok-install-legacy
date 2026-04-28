@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer';
 import { generatePkce } from '../lib/pkce.js';
 import { kvGet, kvPut, kvDelete } from '../lib/kv.js';
-import { createSession, attachGitHubToSession } from '../lib/session.js';
+import { createSession, attachGitHubToSession, deleteSession, sessionIdFromRequest } from '../lib/session.js';
 import { xGetMe } from '../lib/x-api.js';
-import { redirect, error } from '../lib/response.js';
+import { json, redirect, error } from '../lib/response.js';
 import { exchangeOAuthCode, getAuthenticatedUser } from '../lib/github.js';
 
 const X_AUTHORIZE = 'https://x.com/i/oauth2/authorize';
@@ -162,4 +162,21 @@ export async function handleGitHubCallback(request, env) {
   }
   await attachGitHubToSession(env, pkce.sessionId, token, user.login);
   return redirect(pkce.return);
+}
+
+export async function handleLogout(request, env) {
+  let sessionId = sessionIdFromRequest(request);
+  if (!sessionId && request.method === 'POST') {
+    try {
+      const body = await request.json();
+      sessionId = body?.sessionId || null;
+    } catch { /* empty body is fine */ }
+  }
+  if (sessionId) {
+    try { await deleteSession(env, sessionId); } catch { /* swallow */ }
+  }
+  if (request.method === 'GET') {
+    return redirect(`${env.PUBLIC_BASE_URL}/safe-agent-builder.html`);
+  }
+  return json({ ok: true });
 }

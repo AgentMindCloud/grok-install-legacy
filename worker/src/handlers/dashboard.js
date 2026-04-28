@@ -87,6 +87,7 @@ export async function handleDashboardOverview(request, env) {
   const { mint, error: errResp } = await loadOwnedMint(env, session, url.searchParams.get('genesis_id'));
   if (errResp) return errResp;
   const stats = (await kvGet(env, `analytics:${mint.genesisId}`)) ?? {};
+  const hasData = Boolean(stats.replies_total || stats.replies_today || (stats.recent && stats.recent.length));
   return json({
     agent: {
       genesisId: mint.genesisId,
@@ -99,10 +100,14 @@ export async function handleDashboardOverview(request, env) {
     },
     stats: {
       replies_today: stats.replies_today ?? 0,
+      replies_week: stats.replies_week ?? 0,
       replies_total: stats.replies_total ?? 0,
       cost_today_usd: stats.cost_today_usd ?? 0,
+      engagement_score: stats.engagement_score ?? null,
     },
     recent: stats.recent ?? [],
+    connected: hasData,
+    note: hasData ? null : "Real-time analytics are arriving in v1.6 — connect your agent's X account to enable.",
   });
 }
 
@@ -119,6 +124,7 @@ export async function handleDashboardAnalytics(request, env) {
   if (period === '7d') series = daily.slice(-7);
   else if (period === '30d') series = daily.slice(-30);
   else series = daily;
+  const hasData = series.length > 0 || (stats.replies_total ?? 0) > 0;
   return json({
     period,
     series,
@@ -126,6 +132,12 @@ export async function handleDashboardAnalytics(request, env) {
       replies: stats.replies_total ?? 0,
       cost_usd: stats.cost_total_usd ?? 0,
     },
+    top_topics: stats.top_topics ?? [],
+    peak_hours: stats.peak_hours ?? [],
+    sentiment: stats.sentiment ?? { positive: 0, neutral: 0, negative: 0 },
+    best_style: stats.best_style ?? null,
+    connected: hasData,
+    note: hasData ? null : "Real-time analytics are arriving in v1.6.",
   });
 }
 

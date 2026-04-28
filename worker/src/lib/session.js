@@ -1,6 +1,6 @@
 import { kvGet, kvPut, kvDelete } from './kv.js';
 
-const SESSION_TTL = 60 * 60 * 24;
+const SESSION_TTL = 60 * 60 * 2;
 
 function randomId(bytes = 24) {
   const arr = new Uint8Array(bytes);
