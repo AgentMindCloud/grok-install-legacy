@@ -11,3 +11,7 @@ _assets/
 LAUNCH.md
 BUILD-PLAN.md
 .DS_Store
+
+.dev.vars*
+!.dev.vars.example
+!.env.example

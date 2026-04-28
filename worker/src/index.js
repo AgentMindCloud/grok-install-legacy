@@ -1,6 +1,6 @@
 import { preflight, error, json } from './lib/response.js';
 import { handleXStart, handleXCallback, handleGitHubStart, handleGitHubCallback } from './handlers/auth.js';
-import { handleManifestCallback } from './handlers/manifest.js';
+import { handleManifestCallback, handleSetupApp } from './handlers/manifest.js';
 import {
   handleHealth, handleStats, handleWall, handleMintLookup,
   handleAnalyzeProfile, handleGenerateMascot, handleMint, handleStarTemplate,
@@ -45,6 +45,7 @@ async function route(request, env, ctx) {
   if (pathname === '/auth/x/callback' && method === 'GET') return handleXCallback(request, env);
   if (pathname === '/auth/github/start' && method === 'GET') return handleGitHubStart(request, env);
   if (pathname === '/auth/github/callback' && method === 'GET') return handleGitHubCallback(request, env);
+  if (pathname === '/setup-app' && method === 'GET') return handleSetupApp(request, env);
   if (pathname === '/api/manifest-callback' && (method === 'GET' || method === 'POST')) return handleManifestCallback(request, env);
 
   if (pathname === '/api/stats' && method === 'GET') return handleStats(request, env);

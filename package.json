@@ -5,16 +5,26 @@
   "main": "safety-scanner.js",
   "scripts": {
     "scan": "node safety-scanner.js",
-    "test": "node safety-scanner.js templates/DogeDoughAI.yaml"
+    "test": "node safety-scanner.js templates/DogeDoughAI.yaml",
+    "deploy": "npx bundle exec jekyll build && wrangler deploy",
+    "preview": "npx bundle exec jekyll build && wrangler dev"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/AgentMindCloud/grok-install"
   },
-  "keywords": ["grok", "x", "ai-agent", "open-source"],
+  "keywords": [
+    "grok",
+    "x",
+    "ai-agent",
+    "open-source"
+  ],
   "author": "@JanSol0s",
   "dependencies": {
     "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.86.0"
   }
 }
