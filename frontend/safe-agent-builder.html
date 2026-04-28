@@ -2289,13 +2289,17 @@ const AUTHED = _qs.get('authed') === '1';
 async function safeFetch(url, opts) {
   try {
     const res = await fetch(url, opts);
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      console.warn('fetch failed', url, res.status, text.slice(0, 200));
-      return { ok: false, status: res.status, body: null };
-    }
     const ct = res.headers.get('content-type') || '';
-    const body = ct.includes('application/json') ? await res.json() : await res.text();
+    let body = null;
+    if (ct.includes('application/json')) {
+      body = await res.json().catch(() => null);
+    } else {
+      body = await res.text().catch(() => null);
+    }
+    if (!res.ok) {
+      console.warn('fetch failed', url, res.status, body);
+      return { ok: false, status: res.status, body };
+    }
     return { ok: true, status: res.status, body };
   } catch (e) {
     console.warn('fetch error', url, e.message);
@@ -2453,6 +2457,9 @@ function wireMintButtons() {
       btn.innerHTML = original;
       if (r.ok && r.body && r.body.genesisId) {
         showMintOverlay(r.body);
+      } else if (r.status === 401 && r.body && /github/i.test(r.body.error || '')) {
+        const ret = encodeURIComponent(window.location.href);
+        window.location.href = WORKER_URL + '/auth/github/start?session=' + encodeURIComponent(SESSION_ID) + '&return=' + ret;
       } else {
         const detail = (r.body && r.body.error) || ('HTTP ' + r.status);
         alert('Mint failed: ' + detail);
