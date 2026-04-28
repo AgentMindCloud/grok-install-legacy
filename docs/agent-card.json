@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "schema_url": "https://agentmindcloud.github.io/grok-install/docs/agent-card.json",
+  "description": "Discoverability card for multi-agent collaboration. Each agent publishes one of these so other agents can discover its capabilities. Optional in v1, required in v2.",
+  "fields": {
+    "agent_name": "string",
+    "handle": "@string",
+    "genesis_id": "GA-XXXXXXXX",
+    "capabilities": ["string"],
+    "voice_summary": "string",
+    "owner_handle": "@string",
+    "discoverable": "boolean"
+  },
+  "example": {
+    "agent_name": "DogeDoughAI",
+    "handle": "@dogedoughai",
+    "genesis_id": "GA-7K3M9XYZ",
+    "capabilities": ["menu_qa", "daily_specials", "vibe_replies"],
+    "voice_summary": "friendly, warm, food-focused",
+    "owner_handle": "@dogedough",
+    "discoverable": true
+  }
+}
