@@ -101,7 +101,10 @@ export async function handleXCallback(request, env) {
     xToken: accessToken,
   });
 
-  return redirect(builderUrl(env, { session: sessionId, authed: '1' }));
+  const target = pkce.return && pkce.return !== builderUrl(env, {})
+    ? pkce.return + (pkce.return.includes('?') ? '&' : '?') + 'session=' + encodeURIComponent(sessionId) + '&authed=1'
+    : builderUrl(env, { session: sessionId, authed: '1' });
+  return redirect(target);
 }
 
 export async function handleGitHubStart(request, env) {

@@ -1228,7 +1228,7 @@ function renderHandleChip() {
 function showSignInScreen() {
   $('#app').style.display = 'none';
   $('#signin-screen').style.display = 'flex';
-  const link = WORKER_URL + '/auth/x/start?return=dashboard';
+  const link = WORKER_URL + '/auth/x/start?return=' + encodeURIComponent('https://agentmindcloud.github.io/grok-install/dashboard.html');
   $('#signin-x-btn').href = link;
 }
 
