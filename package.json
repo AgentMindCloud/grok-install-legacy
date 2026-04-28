@@ -7,7 +7,10 @@
     "scan": "node safety-scanner.js",
     "test": "node safety-scanner.js templates/DogeDoughAI.yaml",
     "deploy": "npx bundle exec jekyll build && wrangler deploy",
-    "preview": "npx bundle exec jekyll build && wrangler dev"
+    "preview": "npx bundle exec jekyll build && wrangler dev",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
+    "worker:dev": "wrangler dev --config worker/wrangler.toml",
+    "worker:tail": "wrangler tail --config worker/wrangler.toml"
   },
   "license": "MIT",
   "repository": {

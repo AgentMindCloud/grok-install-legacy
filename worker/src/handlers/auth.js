@@ -23,9 +23,23 @@ function builderUrl(env, params) {
   return `${base}?${qs}`;
 }
 
+function safeReturn(env, raw, fallback) {
+  if (!raw) return fallback;
+  let parsed;
+  try { parsed = new URL(raw, env.PUBLIC_BASE_URL); }
+  catch { return fallback; }
+  let allowed;
+  try { allowed = new URL(env.PUBLIC_BASE_URL); }
+  catch { return fallback; }
+  if (parsed.origin !== allowed.origin) return fallback;
+  if (!parsed.pathname.startsWith(allowed.pathname)) return fallback;
+  return parsed.toString();
+}
+
 export async function handleXStart(request, env) {
   const { verifier, challenge, state } = await generatePkce();
-  const ret = new URL(request.url).searchParams.get('return') || builderUrl(env, {});
+  const rawRet = new URL(request.url).searchParams.get('return');
+  const ret = safeReturn(env, rawRet, builderUrl(env, {}));
   await kvPut(env, `pkce:${state}`, { verifier, return: ret, kind: 'x' }, { ttl: 600 });
 
   const redirectUri = `${workerBaseUrl(request, env)}/auth/x/callback`;
@@ -94,7 +108,8 @@ export async function handleGitHubStart(request, env) {
   const url = new URL(request.url);
   const sessionId = url.searchParams.get('session');
   if (!sessionId) return error('Missing session', 400);
-  const ret = url.searchParams.get('return') || builderUrl(env, { session: sessionId, gh: '1' });
+  const rawRet = url.searchParams.get('return');
+  const ret = safeReturn(env, rawRet, builderUrl(env, { session: sessionId, gh: '1' }));
   const state = crypto.randomUUID();
   await kvPut(env, `pkce:${state}`, { kind: 'gh', sessionId, return: ret }, { ttl: 600 });
 

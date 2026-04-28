@@ -88,6 +88,18 @@ node safety-scanner.js templates/DogeDoughAI.yaml
 
 To mint your own: visit [agentmindcloud.github.io/grok-install/safe-agent-builder.html](https://agentmindcloud.github.io/grok-install/safe-agent-builder.html).
 
+## Deploying the Worker (maintainers)
+
+The API Worker config lives at `worker/wrangler.toml` (separate from the root-level `wrangler.jsonc` which serves the Jekyll site). To deploy the API Worker:
+
+```bash
+npm run worker:deploy           # wrangler deploy --config worker/wrangler.toml
+npm run worker:dev              # local dev server
+npm run worker:tail             # live log stream
+```
+
+Running `wrangler` from the project root without `--config` picks up the Jekyll config and fails — always use the npm script or pass the flag explicitly.
+
 ## Contributing
 
 PRs welcome. Especially:

@@ -181,9 +181,22 @@ export async function handleMint(request, env) {
   if (!agentName || !agentHandle) return error('agentName and agentHandle required', 400);
   if (!isValidStyle(mascotStyle)) return error('Invalid mascot style', 400);
 
-  const genesisId = await generateGenesisId(env);
   const slug = slugify(agentName);
   const repoName = slug;
+
+  let repo;
+  try {
+    repo = await createUserRepo(session.ghToken, {
+      name: repoName,
+      description,
+      homepage: `https://x.com/${agentHandle}`,
+      isPrivate: false,
+    });
+  } catch (e) {
+    return error(`Repo create failed: ${e.message}`, 502);
+  }
+
+  const genesisId = await generateGenesisId(env);
 
   const yamlArgs = {
     agentName,
@@ -201,19 +214,7 @@ export async function handleMint(request, env) {
   const files = buildMintRepoFiles(yamlArgs);
   const yamlFile = files.find(f => f.path === 'grok-install.yaml');
   if (!isInlineSafe(yamlFile.content)) {
-    return error('Inline safety check failed; agent NOT minted.', 422);
-  }
-
-  let repo;
-  try {
-    repo = await createUserRepo(session.ghToken, {
-      name: repoName,
-      description,
-      homepage: `https://x.com/${agentHandle}`,
-      isPrivate: false,
-    });
-  } catch (e) {
-    return error(`Repo create failed: ${e.message}`, 502);
+    return error('Inline safety check failed; agent NOT minted.', 422, { repoUrl: repo.html_url });
   }
 
   try {
@@ -225,7 +226,7 @@ export async function handleMint(request, env) {
       files,
     });
   } catch (e) {
-    return error(`Commit failed: ${e.message}`, 502);
+    return error(`Commit failed: ${e.message}`, 502, { repoUrl: repo.html_url });
   }
 
   const mintedAt = new Date().toISOString();
@@ -247,24 +248,40 @@ export async function handleMint(request, env) {
     ghRepo: repo.name,
     mintedAt,
     status: 'active',
+    limits: { daily_replies: 200, qps: 0.5, daily_usd_cap: 3, max_thread_depth: 5, cooldown_seconds: 30 },
+    features: {},
+    blockedUsers: [],
+    templateVersion: '1.5.0',
   };
-  await kvPut(env, `mint:${genesisId}`, mintRecord);
-
-  const ownerKey = `owner:${session.xUsername}`;
-  const ownerList = (await kvGet(env, ownerKey)) ?? [];
-  ownerList.push(genesisId);
-  await kvPut(env, ownerKey, ownerList);
-
-  if (optInWall) {
-    const wall = (await kvGet(env, 'wall:recent')) ?? [];
-    wall.unshift(genesisId);
-    await kvPut(env, 'wall:recent', wall.slice(0, 12));
+  try {
+    await kvPut(env, `mint:${genesisId}`, mintRecord);
+  } catch (e) {
+    return error(`Mint record write failed: ${e.message}`, 502, { repoUrl: repo.html_url, genesisId });
   }
 
-  await bumpDailyCounter(env);
+  try {
+    const ownerKey = `owner:${session.xUsername}`;
+    const ownerList = (await kvGet(env, ownerKey)) ?? [];
+    if (!ownerList.includes(genesisId)) {
+      ownerList.push(genesisId);
+      await kvPut(env, ownerKey, ownerList);
+    }
+  } catch (e) { console.warn('owner list update failed', e); }
+
+  if (optInWall) {
+    try {
+      const wall = (await kvGet(env, 'wall:recent')) ?? [];
+      if (!wall.includes(genesisId)) {
+        wall.unshift(genesisId);
+        await kvPut(env, 'wall:recent', wall.slice(0, 12));
+      }
+    } catch (e) { console.warn('wall update failed', e); }
+  }
+
+  try { await bumpDailyCounter(env); } catch (e) { console.warn('daily counter bump failed', e); }
 
   const tweetText = `Just minted my AI agent @${agentHandle} with grok-install. Genesis ${genesisId}.\n\n@grok install ${repo.html_url}`;
-  const dashboardUrl = `${env.PUBLIC_BASE_URL}/my-agents.html?session=${sessionId}&genesis=${genesisId}`;
+  const dashboardUrl = `${env.PUBLIC_BASE_URL}/dashboard.html?session=${sessionId}&genesis=${genesisId}`;
 
   return json({
     genesisId,

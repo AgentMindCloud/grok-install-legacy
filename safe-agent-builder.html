@@ -2391,31 +2391,126 @@ function getActiveFlow() {
 
 function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
   const intentUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweetText || '');
+  const safeRepo = (repoUrl && /^https:\/\/github\.com\//.test(repoUrl)) ? repoUrl : '';
+  const safeDash = (dashboardUrl && /^https:\/\//.test(dashboardUrl)) ? dashboardUrl : '';
+  const previousFocus = document.activeElement;
   const overlay = document.createElement('div');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'mint-overlay-title');
+  overlay.tabIndex = -1;
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,13,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);';
   overlay.innerHTML =
-    '<div style="background:#0f141c;border:1px solid rgba(74,222,128,0.3);border-radius:18px;padding:32px;max-width:560px;width:100%;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;">' +
-    '<h2 style="color:#4ade80;font-size:24px;margin:0 0 8px;">Minted!</h2>' +
+    '<div style="background:#0f141c;border:1px solid rgba(74,222,128,0.3);border-radius:18px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;">' +
+    '<h2 id="mint-overlay-title" style="color:#4ade80;font-size:24px;margin:0 0 8px;">Minted!</h2>' +
     '<p style="color:#9ca3af;margin:0 0 16px;">Your agent is live. Genesis ID:</p>' +
-    '<div style="font-family:JetBrains Mono,monospace;font-size:18px;color:#c4b5fd;background:rgba(167,139,250,0.12);padding:10px 14px;border-radius:10px;display:inline-block;margin-bottom:18px;">' + (genesisId || 'GA-XXXXXXXX') + '</div>' +
+    '<div style="font-family:JetBrains Mono,monospace;font-size:18px;color:#c4b5fd;background:rgba(167,139,250,0.12);padding:10px 14px;border-radius:10px;display:inline-block;margin-bottom:18px;">' + escapeHtml(genesisId || 'GA-XXXXXXXX') + '</div>' +
     '<p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Repo:</p>' +
-    '<a href="' + (repoUrl || '#') + '" target="_blank" style="color:#22d3ee;font-family:JetBrains Mono,monospace;font-size:13px;display:block;margin-bottom:18px;word-break:break-all;">' + (repoUrl || '') + '</a>' +
+    '<a href="' + safeRepo + '" target="_blank" rel="noopener" style="color:#22d3ee;font-family:JetBrains Mono,monospace;font-size:13px;display:block;margin-bottom:18px;word-break:break-all;">' + escapeHtml(safeRepo) + '</a>' +
     '<p style="color:#9ca3af;font-size:13px;margin:0 0 6px;">Pre-filled tweet:</p>' +
-    '<pre id="mint-tweet-text" style="background:#07090d;border:1px solid rgba(74,222,128,0.15);padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;color:#e8ecf2;margin:0 0 18px;">' + (tweetText || '') + '</pre>' +
+    '<pre id="mint-tweet-text" style="background:#07090d;border:1px solid rgba(74,222,128,0.15);padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;color:#e8ecf2;margin:0 0 18px;">' + escapeHtml(tweetText || '') + '</pre>' +
     '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-    '<button id="mint-copy" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(74,222,128,0.3);border-radius:10px;color:#e8ecf2;font-weight:500;cursor:pointer;">Copy tweet</button>' +
-    '<a href="' + intentUrl + '" target="_blank" style="flex:1;min-width:120px;padding:12px 18px;background:linear-gradient(135deg,#4ade80,#22ee88);border-radius:10px;color:#07090d;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;">Open in X</a>' +
-    (dashboardUrl ? '<a href="' + dashboardUrl + '" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(167,139,250,0.3);border-radius:10px;color:#c4b5fd;font-weight:500;text-decoration:none;text-align:center;">Dashboard</a>' : '') +
+    '<button id="mint-copy" type="button" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(74,222,128,0.3);border-radius:10px;color:#e8ecf2;font-weight:500;cursor:pointer;">Copy tweet</button>' +
+    '<a id="mint-intent" href="' + intentUrl + '" target="_blank" rel="noopener" style="flex:1;min-width:120px;padding:12px 18px;background:linear-gradient(135deg,#4ade80,#22ee88);border-radius:10px;color:#07090d;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;">Open in X</a>' +
+    (safeDash ? '<a id="mint-dash" href="' + safeDash + '" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(167,139,250,0.3);border-radius:10px;color:#c4b5fd;font-weight:500;text-decoration:none;text-align:center;">Dashboard</a>' : '') +
     '</div>' +
-    '<button id="mint-close" style="margin-top:14px;width:100%;padding:8px;background:transparent;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Close</button>' +
+    '<button id="mint-close" type="button" style="margin-top:14px;width:100%;padding:8px;background:transparent;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Close</button>' +
     '</div>';
   document.body.appendChild(overlay);
-  document.getElementById('mint-copy').addEventListener('click', () => {
-    navigator.clipboard.writeText(tweetText || '').then(() => {
-      document.getElementById('mint-copy').textContent = 'Copied!';
-    }).catch(() => {});
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function close() {
+    document.removeEventListener('keydown', onKey);
+    overlay.remove();
+    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const focusables = overlay.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+    if (!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  const copyBtn = document.getElementById('mint-copy');
+  copyBtn.addEventListener('click', async () => {
+    copyBtn.disabled = true;
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(tweetText || '');
+        ok = true;
+      }
+    } catch (err) { console.warn('clipboard error', err); }
+    if (!ok) {
+      try {
+        const ta = document.getElementById('mint-tweet-text');
+        const range = document.createRange();
+        range.selectNodeContents(ta);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        ok = document.execCommand && document.execCommand('copy');
+        sel.removeAllRanges();
+      } catch (err2) { console.warn('exec copy error', err2); }
+    }
+    copyBtn.textContent = ok ? 'Copied!' : 'Press Ctrl+C to copy';
+    setTimeout(() => { copyBtn.textContent = 'Copy tweet'; copyBtn.disabled = false; }, 2200);
   });
-  document.getElementById('mint-close').addEventListener('click', () => overlay.remove());
+  document.getElementById('mint-close').addEventListener('click', close);
+  // Initial focus on the most useful action
+  const initial = document.getElementById('mint-intent') || copyBtn;
+  if (initial) initial.focus();
+}
+
+function showMintError({ status, body, retry }) {
+  const previousFocus = document.activeElement;
+  const detail = (body && (body.error || body.detail)) || '';
+  let title = 'Mint failed';
+  let helpful = '';
+  if (status === 0) helpful = "Couldn't reach the server — check your connection and try again.";
+  else if (status === 401 || status === 403) helpful = "Sign-in expired. Please sign in again.";
+  else if (status === 422) helpful = "Safety scan rejected the agent. Try a different name or fewer permissions.";
+  else if (status >= 500) helpful = "Something went wrong on our side. Wait a moment and retry.";
+  else if (status === 429) helpful = "Too many requests. Wait a minute and try again.";
+  else helpful = "Something didn't work. You can retry.";
+
+  const overlay = document.createElement('div');
+  overlay.setAttribute('role', 'alertdialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,13,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);';
+  overlay.innerHTML =
+    '<div style="background:#0f141c;border:1px solid rgba(227,66,52,0.4);border-radius:18px;padding:28px;max-width:480px;width:100%;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;">' +
+    '<h3 style="color:#e34234;font-size:18px;margin:0 0 8px;">' + title + '</h3>' +
+    '<p style="color:#e8ecf2;font-size:14px;margin:0 0 14px;">' + helpful + '</p>' +
+    (detail ? '<pre style="background:#07090d;border:1px solid rgba(227,66,52,0.2);padding:10px;border-radius:8px;font-size:11px;color:#9ca3af;white-space:pre-wrap;margin:0 0 14px;max-height:120px;overflow:auto;">' + detail.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>' : '') +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+    '<button id="me-close" type="button" style="padding:10px 18px;background:#151b26;border:1px solid rgba(74,222,128,0.2);border-radius:10px;color:#9ca3af;cursor:pointer;">Close</button>' +
+    (retry ? '<button id="me-retry" type="button" style="padding:10px 18px;background:linear-gradient(135deg,#4ade80,#22ee88);border:none;border-radius:10px;color:#07090d;font-weight:700;cursor:pointer;">Try again</button>' : '') +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  function close() {
+    document.removeEventListener('keydown', onKey);
+    overlay.remove();
+    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(); } }
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.getElementById('me-close').addEventListener('click', close);
+  if (retry) {
+    document.getElementById('me-retry').addEventListener('click', () => { close(); retry(); });
+    document.getElementById('me-retry').focus();
+  } else {
+    document.getElementById('me-close').focus();
+  }
 }
 
 function wireMintButtons() {
@@ -2426,8 +2521,6 @@ function wireMintButtons() {
         return;
       }
       const original = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = 'Minting…';
       const flow = getActiveFlow();
       const panel = document.querySelector('.flow-panel.active') || document;
       const nameInput = panel.querySelector('input[type="text"]');
@@ -2448,22 +2541,28 @@ function wireMintButtons() {
           ? (document.querySelector('.template-card.selected h3')?.textContent || null)
           : null,
       };
-      const r = await safeFetch(WORKER_URL + '/api/mint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      btn.disabled = false;
-      btn.innerHTML = original;
-      if (r.ok && r.body && r.body.genesisId) {
-        showMintOverlay(r.body);
-      } else if (r.status === 401 && r.body && /github/i.test(r.body.error || '')) {
-        const ret = encodeURIComponent(window.location.href);
-        window.location.href = WORKER_URL + '/auth/github/start?session=' + encodeURIComponent(SESSION_ID) + '&return=' + ret;
-      } else {
-        const detail = (r.body && r.body.error) || ('HTTP ' + r.status);
-        alert('Mint failed: ' + detail);
+      async function attemptMint() {
+        btn.disabled = true;
+        btn.innerHTML = 'Minting…';
+        const r = await safeFetch(WORKER_URL + '/api/mint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        btn.disabled = false;
+        btn.innerHTML = original;
+        if (r.ok && r.body && r.body.genesisId) {
+          showMintOverlay(r.body);
+          return;
+        }
+        if (r.status === 401 && r.body && /github/i.test(r.body.error || '')) {
+          const ret = encodeURIComponent(window.location.href);
+          window.location.href = WORKER_URL + '/auth/github/start?session=' + encodeURIComponent(SESSION_ID) + '&return=' + ret;
+          return;
+        }
+        showMintError({ status: r.status, body: r.body, retry: attemptMint });
       }
+      attemptMint();
     });
   });
 }

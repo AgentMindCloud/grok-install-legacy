@@ -6,6 +6,13 @@ import { buildAgentYaml } from '../lib/repo-template.js';
 
 const MEMORY_MAX_BYTES = 50 * 1024;
 
+function csvCell(v) {
+  let s = String(v ?? '');
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
+  s = s.replace(/"/g, '""');
+  return '"' + s + '"';
+}
+
 async function loadOwnedMint(env, session, genesisId) {
   if (!genesisId) {
     const list = (await kvGet(env, `owner:${session.xUsername}`)) ?? [];
@@ -131,7 +138,7 @@ export async function handleDashboardAnalyticsExport(request, env) {
   const stats = (await kvGet(env, `analytics:${mint.genesisId}`)) ?? {};
   const daily = stats.daily ?? [];
   const lines = ['date,replies,cost_usd'];
-  for (const d of daily) lines.push(`${d.date},${d.replies ?? 0},${d.cost_usd ?? 0}`);
+  for (const d of daily) lines.push([csvCell(d.date), csvCell(d.replies ?? 0), csvCell(d.cost_usd ?? 0)].join(','));
   return attachment(lines.join('\n'), `${mint.ghRepo}-analytics.csv`, 'text/csv; charset=utf-8');
 }
 
