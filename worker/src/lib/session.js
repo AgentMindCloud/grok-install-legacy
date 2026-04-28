@@ -1,4 +1,5 @@
 import { kvGet, kvPut, kvDelete } from './kv.js';
+import { error as errorResponse } from './response.js';
 
 const SESSION_TTL = 60 * 60 * 2;
 
@@ -61,4 +62,12 @@ export function sessionIdFromRequest(request) {
   if (header) return header;
   const url = new URL(request.url);
   return url.searchParams.get('session');
+}
+
+export async function withSession(request, env, handler) {
+  const sessionId = sessionIdFromRequest(request);
+  let session;
+  try { session = await requireSession(env, sessionId); }
+  catch (e) { return errorResponse(e.message, e.status || 401); }
+  return handler(session, sessionId);
 }

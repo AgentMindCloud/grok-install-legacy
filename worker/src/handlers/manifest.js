@@ -13,7 +13,11 @@ function buildManifestJson(workerUrl) {
       active: false,
     },
     public: false,
-    default_permissions: { contents: 'write', metadata: 'read' },
+    default_permissions: {
+      administration: 'write',
+      contents: 'write',
+      metadata: 'read',
+    },
     default_events: [],
   };
 }

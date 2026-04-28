@@ -1,4 +1,5 @@
 import { preflight, error, json } from './lib/response.js';
+import { logError, requestContext } from './lib/logger.js';
 import { handleXStart, handleXCallback, handleGitHubStart, handleGitHubCallback, handleLogout } from './handlers/auth.js';
 import { handleManifestCallback, handleSetupApp } from './handlers/manifest.js';
 import {
@@ -15,17 +16,19 @@ import {
   handleDashboardHistory, handleDashboardPause, handleDashboardResume, handleDashboardDelete,
 } from './handlers/dashboard.js';
 
-async function logError(env, e, request) {
+async function persistError(env, e, request) {
+  const ctx = requestContext(request);
+  logError({ ...ctx, message: e.message, stack: (e.stack || '').slice(0, 800) });
   try {
     const ts = new Date().toISOString();
     await env.GROK_INSTALL_KV.put(
       `error:${ts}`,
       JSON.stringify({
         ts,
+        ...ctx,
         message: e.message,
         stack: (e.stack || '').slice(0, 1500),
         url: request.url,
-        method: request.method,
       }),
       { expirationTtl: 60 * 60 * 24 * 7 },
     );
@@ -85,7 +88,7 @@ export default {
     try {
       return await route(request, env, ctx);
     } catch (e) {
-      ctx?.waitUntil?.(logError(env, e, request));
+      ctx?.waitUntil?.(persistError(env, e, request));
       return json({ error: 'Internal error', detail: e.message }, { status: 500 });
     }
   },

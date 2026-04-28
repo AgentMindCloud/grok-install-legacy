@@ -1297,7 +1297,11 @@ async function loadOverview() {
   const stats = d.stats || {};
   const recent = Array.isArray(d.recent) ? d.recent : [];
   const status = d.agent?.status || CURRENT_AGENT.status || 'active';
+  const overviewBanner = d.connected === false
+    ? '<div class="empty" style="margin-bottom:16px;text-align:left;border-color:var(--border-purple);"><h3 style="color:var(--purple-bright);">Live numbers — coming in v1.6</h3>' + escapeHtml(d.note || 'These will populate once your agent\'s X account is connected.') + '</div>'
+    : '';
   body.innerHTML =
+    overviewBanner +
     '<div class="stat-grid">' +
       statCard('Replies today', stats.replies_today, true) +
       statCard('Replies this week', stats.replies_week ?? null) +
@@ -1394,9 +1398,14 @@ async function loadAnalytics() {
   const topTopics = d.top_topics || [];
   const peakHours = d.peak_hours || [];
   const sentiment = d.sentiment || { positive: 0, neutral: 0, negative: 0 };
-  const bestStyle = d.best_style || 'questions';
+  const bestStyle = d.best_style || '—';
+
+  const connectedBanner = d.connected === false
+    ? '<div class="empty" style="margin-bottom:18px;text-align:left;border-color:var(--border-purple);"><h3 style="color:var(--purple-bright);">Real-time analytics — coming in v1.6</h3>' + escapeHtml(d.note || 'Connect your agent\'s X account once Phase 5b ships to see live metrics.') + '</div>'
+    : '';
 
   body.innerHTML =
+    connectedBanner +
     '<div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">' +
       statCard('Replies in period', totals.replies ?? 0, true) +
       statCard('Cost (USD)', totals.cost_usd != null ? '$' + Number(totals.cost_usd).toFixed(2) : '—') +
@@ -1608,10 +1617,10 @@ async function loadMemory() {
   const kb = (bytes / 1024).toFixed(1);
   const pct = Math.min(100, (bytes / (50 * 1024)) * 100);
   body.innerHTML = `
-    <div class="stat-card" style="margin-bottom:16px;">
+    <div class="stat-card" id="memory-meter" style="margin-bottom:16px;">
       <div class="stat-label">Used</div>
-      <div class="stat-value gradient">${kb} KB <span style="font-size:14px;color:var(--text-faint);">/ 50 KB</span></div>
-      <div class="kb-gauge"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="stat-value gradient" id="memory-kb-value">${kb} KB <span style="font-size:14px;color:var(--text-faint);">/ 50 KB</span></div>
+      <div class="kb-gauge"><div class="fill" id="memory-kb-fill" style="width:${pct}%"></div></div>
     </div>
     <div class="textarea-block">
       <textarea id="memory-textarea" placeholder="# Agent memory&#10;&#10;This file is owner-controlled.">${escapeHtml(content)}</textarea>
@@ -1621,6 +1630,20 @@ async function loadMemory() {
       <button class="btn btn-danger" id="memory-clear">Clear memory</button>
     </div>
   `;
+  const ta = $('#memory-textarea');
+  const kbValue = $('#memory-kb-value');
+  const kbFill = $('#memory-kb-fill');
+  function updateMeter() {
+    const b = new TextEncoder().encode(ta.value).length;
+    const p = Math.min(100, (b / (50 * 1024)) * 100);
+    const k = (b / 1024).toFixed(1);
+    kbValue.innerHTML = `${k} KB <span style="font-size:14px;color:var(--text-faint);">/ 50 KB</span>`;
+    kbFill.style.width = p + '%';
+    if (b > 50 * 1024) { kbValue.style.color = 'var(--cinnabar)'; }
+    else if (b > 40 * 1024) { kbValue.style.color = 'var(--warn)'; }
+    else { kbValue.style.color = ''; }
+  }
+  ta.addEventListener('input', updateMeter);
   $('#memory-save').addEventListener('click', saveMemory);
   $('#memory-clear').addEventListener('click', clearMemoryConfirm);
 }
