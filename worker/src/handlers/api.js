@@ -289,34 +289,6 @@ export async function handleMint(request, env) {
     return error(`Slow down — please wait ${Math.ceil(waitMs / 1000)}s before minting again.`, 429);
   }
 
-  // Per-IP mint rate limit: 2 mints per rolling hour. Fails open on KV errors.
-  const IP_MINT_LIMIT = 2;
-  const IP_WINDOW_MS = 60 * 60 * 1000;
-  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '';
-  if (ip) {
-    const ipKey = `mint-ip-bucket:${ip.split(',')[0].trim()}`;
-    try {
-      const bucket = await kvGet(env, ipKey);
-      const now = Date.now();
-      if (bucket && bucket.expiresAt && bucket.expiresAt > now) {
-        if ((bucket.count || 0) >= IP_MINT_LIMIT) {
-          const waitS = Math.ceil((bucket.expiresAt - now) / 1000);
-          return new Response(
-            JSON.stringify({ error: `Mint rate limit reached for this network. Try again in ${Math.ceil(waitS / 60)} minute(s).` }),
-            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(waitS) } }
-          );
-        }
-        const ttl = Math.max(60, Math.ceil((bucket.expiresAt - now) / 1000));
-        await kvPut(env, ipKey, { count: (bucket.count || 0) + 1, expiresAt: bucket.expiresAt }, { ttl });
-      } else {
-        const expiresAt = now + IP_WINDOW_MS;
-        await kvPut(env, ipKey, { count: 1, expiresAt }, { ttl: Math.ceil(IP_WINDOW_MS / 1000) });
-      }
-    } catch (e) {
-      console.warn('mint: ip rate-limit KV op failed (failing open):', e.message);
-    }
-  }
-
   const agentName = String(body.agentName || '').trim();
   const agentHandle = String(body.agentHandle || '').trim().replace(/^@/, '');
   const mascotStyle = body.mascotStyle || 'specimen_plate';
