@@ -2269,51 +2269,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
       </a>
     </div>
 
-    <!-- Newsletter form -->
-    <div style="margin-top:3rem;">
-      <p style="font-family:'Inter',sans-serif;font-size:0.875rem;color:#8B8B9A;margin:0 0 1rem;line-height:1.6;">
-        Get spec updates and new agents in your inbox. No spam. Unsubscribe anytime.
-      </p>
-      <form
-        id="newsletter-form"
-        action="https://app.brevo.com/"
-        method="POST"
-        style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;max-width:28rem;margin:0 auto;"
-        onsubmit="handleNewsletterSubmit(event)"
-      >
-        <input
-          type="email"
-          name="email"
-          placeholder="your@email.com"
-          required
-          style="flex:1;min-width:0;background:#13131A;border:1px solid #1F1F2A;border-radius:0.75rem;padding:0.75rem 1rem;color:#F5F5F7;font-family:'Inter',sans-serif;font-size:0.9375rem;outline:none;transition:border-color 0.2s;"
-          class="newsletter-input"
-        />
-        <button
-          type="submit"
-          style="background:#7C3AED;color:#ffffff;padding:0.75rem 1.5rem;border-radius:0.75rem;border:none;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9375rem;cursor:pointer;white-space:nowrap;transition:background 0.2s,box-shadow 0.2s;"
-          class="newsletter-btn"
-        >
-          Subscribe
-        </button>
-      </form>
-      <!-- Confirmation message (hidden initially) -->
-      <p
-        id="newsletter-confirm"
-        style="display:none;font-family:'Inter',sans-serif;font-size:0.9375rem;color:#00FFA3;font-weight:600;margin-top:0.75rem;"
-      >
-        Thanks! Check your inbox.
-      </p>
-    </div>
-
-    <!-- Micro trust signals -->
-    <div style="display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;margin-top:1.75rem;">
-      <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#8B8B9A;">No spam</span>
-      <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#8B8B9A;">&#183;</span>
-      <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#8B8B9A;">Unsubscribe anytime</span>
-      <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#8B8B9A;">&#183;</span>
-      <span style="font-family:'Inter',sans-serif;font-size:0.75rem;color:#8B8B9A;">Spec updates only</span>
-    </div>
   </div>
 </section>
 
@@ -2386,15 +2341,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
     border-color: rgba(0, 240, 255, 0.7) !important;
   }
 
-  /* Newsletter input focus */
-  .newsletter-input:focus {
-    border-color: rgba(0, 240, 255, 0.5) !important;
-  }
-  .newsletter-btn:hover {
-    background: #6d28d9 !important;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
-  }
-
   /* Footer / inline links */
   .footer-link:hover {
     color: #00F0FF !important;
@@ -2412,7 +2358,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
     .stack-pill,
     .cta-primary,
     .cta-secondary,
-    .newsletter-btn,
     .footer-link {
       transition: none !important;
     }
@@ -2424,7 +2369,7 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
 </style>
 
 <!-- ============================================================
-     VANILLA JS — IntersectionObserver + newsletter
+     VANILLA JS — IntersectionObserver
      ============================================================ -->
 <script>
 (function () {
@@ -2491,16 +2436,7 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
     });
   }
 
-  /* ── 3. Newsletter submit handler ─────────────────────────── */
-  window.handleNewsletterSubmit = function (e) {
-    e.preventDefault();
-    var form = document.getElementById('newsletter-form');
-    var confirm = document.getElementById('newsletter-confirm');
-    if (form) form.style.display = 'none';
-    if (confirm) confirm.style.display = 'block';
-  };
-
-  /* ── 4. Compare table row hover (JS fallback for specificity) */
+  /* ── 3. Compare table row hover (JS fallback for specificity) */
   document.querySelectorAll('.compare-row').forEach(function (row) {
     var cells = row.querySelectorAll('td');
     var origBg = row.style.background;
