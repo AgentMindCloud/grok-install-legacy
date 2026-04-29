@@ -907,6 +907,28 @@ input[type="range"]::-moz-range-thumb {
 .sidebar {
   position: sticky; top: 20px;
 }
+.sidebar-toggle {
+  display: none;
+  width: 100%;
+  background: rgba(167, 139, 250, 0.08);
+  border: 1px solid var(--border-purple);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.sidebar-toggle:hover { background: rgba(167, 139, 250, 0.14); }
+.sidebar-toggle:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
+@media (max-width: 860px) {
+  .sidebar { position: static; }
+  .sidebar-toggle { display: block; }
+  .sidebar-card.collapsed { display: none; }
+}
 .sidebar-card {
   background: linear-gradient(180deg, rgba(167, 139, 250, 0.05) 0%, rgba(15, 20, 28, 0.7) 50%);
   border: 1px solid var(--border-purple);
@@ -2481,7 +2503,8 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 
     <!-- RIGHT: SIDEBAR -->
     <div class="sidebar">
-      <div class="sidebar-card">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar-card">Hide YAML preview ▴</button>
+      <div class="sidebar-card" id="sidebar-card">
         <div class="score-head">
           <div>
             <div class="score-label">Live safety score</div>
@@ -2931,6 +2954,26 @@ function showMintError({ status, body, retry }) {
   }
 }
 
+function wireSidebarToggle() {
+  const toggle = document.getElementById('sidebar-toggle');
+  const card = document.getElementById('sidebar-card');
+  if (!toggle || !card) return;
+  const isMobile = window.matchMedia('(max-width: 860px)').matches;
+  const stored = sessionStorage.getItem('sidebarOpen');
+  let open = stored === null ? !isMobile : stored === 'true';
+  function render() {
+    card.classList.toggle('collapsed', !open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.textContent = open ? 'Hide YAML preview ▴' : 'Show YAML preview ▾';
+  }
+  toggle.addEventListener('click', () => {
+    open = !open;
+    sessionStorage.setItem('sidebarOpen', open ? 'true' : 'false');
+    render();
+  });
+  render();
+}
+
 function wireMintButtons() {
   document.querySelectorAll('.btn-generate').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -3009,6 +3052,7 @@ function wireMintButtons() {
   // before any async fetch completes.
   try { wireSignIn(); } catch {}
   try { wireMintButtons(); } catch {}
+  try { wireSidebarToggle(); } catch {}
   try {
     document.querySelectorAll('input[name="agent-name"]').forEach(el => {
       el.addEventListener('input', () => { el.dataset.userTouched = '1'; });
