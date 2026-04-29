@@ -508,28 +508,9 @@ nav {
   position: relative;
   overflow: hidden;
 }
-/* slow rotating conic-gradient ring around the card */
-.qms-conic {
-  position: absolute;
-  inset: -2px;
-  border-radius: 24px;
-  padding: 2px;
-  background: conic-gradient(from 0deg,
-    rgba(74,222,128,0.85) 0deg,
-    rgba(34,211,238,0.65) 90deg,
-    rgba(167,139,250,0.55) 180deg,
-    rgba(34,211,238,0.65) 270deg,
-    rgba(74,222,128,0.85) 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  animation: qmsConicRotate 9s linear infinite;
-  z-index: 0;
-}
-@keyframes qmsConicRotate {
-  to { transform: rotate(360deg); }
-}
+/* slow rotating conic gradient ring around the card — disabled
+   per Louis's feedback (the spin felt too busy). Static frame
+   border on .quick-mint-frame--ultra carries the visual weight. */
 
 /* particles drifting inside the frame */
 .qms-particles {
@@ -611,6 +592,9 @@ nav {
   50%      { opacity: 1;    transform: scale(1.04); }
 }
 
+/* Glassmorph 3D button: translucent gradient surface with a top-edge
+   highlight, bottom-edge shadow, white rim border, and layered drop
+   shadows — reads as a real raised piece of glass on the page. */
 .btn-quick-mint--ultra {
   position: relative;
   z-index: 1;
@@ -618,7 +602,58 @@ nav {
   font-size: 17px;
   border-radius: 18px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--green) 0%, #22ee88 45%, var(--cyan) 100%);
+  color: #07090d;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.22) 0%,
+      rgba(255,255,255,0.06) 48%,
+      rgba(0,0,0,0.10) 100%),
+    linear-gradient(135deg,
+      rgba(74,222,128,0.95) 0%,
+      rgba(34,238,136,0.95) 50%,
+      rgba(34,211,238,0.95) 100%);
+  border: 1px solid rgba(255,255,255,0.32);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 1px rgba(0,0,0,0.18),
+    inset 0 0 24px rgba(255,255,255,0.10),
+    0 14px 32px -10px rgba(34,211,238,0.55),
+    0 6px 14px -2px rgba(0,0,0,0.40);
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.20s ease,
+    border-color 0.20s ease;
+}
+.btn-quick-mint--ultra:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.70),
+    inset 0 -1px 1px rgba(0,0,0,0.20),
+    inset 0 0 32px rgba(255,255,255,0.16),
+    0 22px 44px -10px rgba(34,211,238,0.70),
+    0 12px 22px -4px rgba(0,0,0,0.45);
+}
+.btn-quick-mint--ultra:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    inset 0 -1px 1px rgba(0,0,0,0.10),
+    inset 0 0 18px rgba(255,255,255,0.08),
+    0 8px 16px -4px rgba(34,211,238,0.45),
+    0 4px 8px -2px rgba(0,0,0,0.30);
+}
+.btn-quick-mint--ultra:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 3px;
+}
+.btn-quick-mint--ultra:disabled {
+  filter: saturate(0.7);
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 .btn-quick-mint--ultra .qm-icon { font-size: 32px; }
 .btn-quick-mint--ultra .qm-title { font-size: 22px; }
@@ -668,7 +703,6 @@ nav {
 
 @media (prefers-reduced-motion: reduce) {
   .quick-mint-section--ultra::before,
-  .qms-conic,
   .qms-p,
   .qms-button-halo::before,
   .btn-quick-mint--ultra .qm-shine { animation: none; }
@@ -2899,7 +2933,6 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
        world's only one-click-to-X agent mint flow on the internet. -->
   <section class="quick-mint-section quick-mint-section--ultra" aria-labelledby="quick-mint-title">
     <div class="quick-mint-frame quick-mint-frame--ultra">
-      <span class="qms-conic" aria-hidden="true"></span>
       <div class="qms-particles" aria-hidden="true">
         <span class="qms-p qms-p1"></span>
         <span class="qms-p qms-p2"></span>
