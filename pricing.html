@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing &amp; trust — grok-install</title>
+<meta name="description" content="What it costs to mint and run an agent built with grok-install. Honest, capped, no hidden fees.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090d;
+  --bg-card: rgba(15, 20, 28, 0.7);
+  --border: rgba(74, 222, 128, 0.12);
+  --border-strong: rgba(74, 222, 128, 0.3);
+  --green: #4ade80;
+  --cyan: #22d3ee;
+  --purple: #a78bfa;
+  --text: #e8ecf2;
+  --text-dim: #9ca3af;
+  --text-faint: #6b7280;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 15px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+body { min-height: 100vh; padding: 56px 24px 80px; }
+.bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-glow::before {
+  content: ''; position: absolute; border-radius: 50%;
+  width: 600px; height: 600px;
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  top: -220px; right: -220px;
+  filter: blur(150px); opacity: 0.18;
+}
+.wrap { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+.crumb {
+  font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+  margin-bottom: 18px;
+}
+.crumb a { color: var(--green); text-decoration: none; }
+.crumb a:hover { color: var(--text); }
+h1 {
+  font-size: 38px; font-weight: 800; letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+h1 .gradient {
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.lede { color: var(--text-dim); font-size: 17px; margin-bottom: 36px; max-width: 580px; }
+section.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(8px);
+}
+section.card h2 {
+  font-size: 18px; font-weight: 700; letter-spacing: -0.01em;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+}
+section.card h2 .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+}
+section.card h2.cyan .dot { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+section.card h2.purple .dot { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+section.card p { color: var(--text-dim); margin-bottom: 10px; }
+section.card p:last-child { margin-bottom: 0; }
+section.card strong { color: var(--text); font-weight: 600; }
+section.card code {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--cyan); background: rgba(34, 211, 238, 0.08);
+  padding: 1px 6px; border-radius: 4px;
+}
+ul {
+  list-style: none; padding: 0; margin: 6px 0 0;
+}
+ul li {
+  position: relative; padding-left: 22px; color: var(--text-dim);
+  margin-bottom: 8px;
+}
+ul li::before {
+  content: '✓'; position: absolute; left: 0; top: 0;
+  color: var(--green); font-weight: 700;
+}
+ul li:last-child { margin-bottom: 0; }
+.fine {
+  margin-top: 28px; font-size: 12px; color: var(--text-faint);
+  font-family: var(--mono); line-height: 1.7;
+}
+.fine a { color: var(--green); text-decoration: none; }
+.fine a:hover { color: var(--text); }
+.cta {
+  margin-top: 32px; text-align: center;
+}
+.cta a {
+  display: inline-block; padding: 12px 26px;
+  background: var(--text); color: var(--bg);
+  border-radius: 999px; text-decoration: none;
+  font-weight: 600; font-size: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.cta a:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,255,255,0.12); }
+@media (max-width: 600px) {
+  body { padding: 32px 18px 60px; }
+  h1 { font-size: 28px; }
+  .lede { font-size: 15px; }
+  section.card { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="wrap">
+  <div class="crumb"><a href="safe-agent-builder.html">← back to the builder</a></div>
+  <h1>Pricing &amp; <span class="gradient">trust</span></h1>
+  <p class="lede">What it costs to build, mint, and run a grok-install agent. Honest numbers, capped by you, no hidden fees.</p>
+
+  <section class="card">
+    <h2><span class="dot"></span> Minting is free</h2>
+    <p>The builder, the safety scan, the GitHub repo, the Genesis ID, the wall card, the dashboard — all free. We don't take a cut.</p>
+    <p>You authorize a one-time GitHub App install so we can commit your agent's <code>grok-install.yaml</code> to your own repo. The repo is yours. Apache 2.0 license. You can delete it any time and your agent stops working.</p>
+  </section>
+
+  <section class="card">
+    <h2 class="cyan"><span class="dot"></span> Replies are billed by xAI, not us</h2>
+    <p>Once your agent is live on X, every reply it generates calls Grok via <strong>your own xAI account</strong>. The bill comes from xAI, billed at xAI's published rates against the credits you already have.</p>
+    <p>We never see your xAI key, and we never bill you for inference. If your xAI credits run out, your agent stops replying — politely, with no overdraft.</p>
+    <p>Real per-reply cost depends on Grok's pricing tier and how long your replies are. xAI publishes the up-to-date numbers here:</p>
+    <ul>
+      <li><a href="https://x.ai/api" target="_blank" rel="noopener" style="color: var(--cyan); text-decoration: none;">x.ai/api — current Grok pricing</a></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2 class="purple"><span class="dot"></span> You set every cap</h2>
+    <p>Every minted agent ships with caps you control on the dashboard:</p>
+    <ul>
+      <li><strong>Daily reply count</strong> (default 200) — hard ceiling per day</li>
+      <li><strong>Daily USD cap</strong> (default $3.00) — agent stops on hit, you get notified</li>
+      <li><strong>Per-request cost cap</strong> — refuses replies that would exceed it</li>
+      <li><strong>Rate limits per tool</strong> — qps + burst configurable</li>
+    </ul>
+    <p>Limits live in your agent's <code>grok-install.yaml</code> under <code>rate_limits</code> and <code>cost_limits</code>. You can change them any time — the dashboard commits the change to your repo.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot"></span> What we promise</h2>
+    <ul>
+      <li><strong>No hidden fees, ever.</strong> If we ever charge for anything, it'll be on this page first.</li>
+      <li><strong>Read-only X access during sign-in.</strong> We analyze your bio + recent posts to extract Voice DNA. We never post on your behalf.</li>
+      <li><strong>Agent identity = your X handle.</strong> Your agent posts from your account, with the safety profile you minted. No fake accounts.</li>
+      <li><strong>Mention-only replies, opt-in for sensitive actions.</strong> Your agent only replies when @-mentioned. Direct messages and follows require explicit owner approval.</li>
+      <li><strong>Apache 2.0 license.</strong> Both the platform and every minted agent's repo. Fork it, audit it, run your own — that's the point.</li>
+    </ul>
+  </section>
+
+  <div class="cta">
+    <a href="safe-agent-builder.html">Build my agent →</a>
+  </div>
+
+  <p class="fine">Questions? <a href="https://github.com/AgentMindCloud/grok-install/issues" target="_blank" rel="noopener">Open an issue</a> or <a href="https://x.com/JanSol0s" target="_blank" rel="noopener">DM @JanSol0s</a>.</p>
+</div>
+</body>
+</html>

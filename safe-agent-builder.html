@@ -232,6 +232,38 @@ nav {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.hero-pricing-pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 14px;
+  padding: 9px 16px;
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.22);
+  border-radius: 999px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text-dim);
+  opacity: 0; animation: fadeUp 0.8s ease-out 0.55s forwards;
+  flex-wrap: wrap; justify-content: center;
+}
+.hero-pricing-pill .hpp-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px;
+  background: var(--green);
+  color: var(--bg);
+  border-radius: 50%;
+  font-weight: 700; font-size: 11px;
+  font-family: var(--sans);
+}
+.hero-pricing-pill .hpp-text { color: var(--text); font-weight: 500; }
+.hero-pricing-pill .hpp-link {
+  color: var(--green); text-decoration: none; font-weight: 600;
+  border-left: 1px solid rgba(74, 222, 128, 0.25); padding-left: 12px;
+}
+.hero-pricing-pill .hpp-link:hover { color: var(--text); }
+@media (max-width: 700px) {
+  .hero-pricing-pill { font-size: 11px; gap: 8px; padding: 8px 14px; }
+  .hero-pricing-pill .hpp-link { padding-left: 8px; }
+}
+
 /* Path tabs */
 .path-tabs {
   display: flex; gap: 8px;
@@ -1709,6 +1741,11 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <span class="stat"><span class="num">0</span> today</span>
       <span style="color: var(--text-mute);">·</span>
       <span class="stat" style="color: var(--purple-bright);">be the first</span>
+    </div>
+    <div class="hero-pricing-pill" role="note" aria-label="Pricing and trust">
+      <span class="hpp-icon" aria-hidden="true">$</span>
+      <span class="hpp-text">Free to mint · You set the daily cap · Billed via your xAI credits</span>
+      <a class="hpp-link" href="pricing.html">Pricing &amp; trust →</a>
     </div>
   </section>
 
