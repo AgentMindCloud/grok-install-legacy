@@ -2878,8 +2878,24 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 const WORKER_URL = "https://grok-install-api.jani-starck2.workers.dev";
 
 const _qs = new URLSearchParams(window.location.search);
-const SESSION_ID = _qs.get('session');
-const AUTHED = _qs.get('authed') === '1';
+const _qsSession = _qs.get('session');
+const _qsAuthed = _qs.get('authed') === '1';
+
+// Persist the session ID so it survives page reloads / fresh nav.
+// The worker keeps the session in KV for 2 hours; client just needs
+// to remember the ID it was issued. Stale IDs hit 401 on the next
+// /api/* call and the standard error path takes over.
+try {
+  if (_qsSession) localStorage.setItem('grok_session_id', _qsSession);
+  if (_qsAuthed) localStorage.setItem('grok_authed', '1');
+} catch { /* private mode / disabled storage — fall through */ }
+
+let SESSION_ID = _qsSession;
+let AUTHED = _qsAuthed;
+try {
+  if (!SESSION_ID) SESSION_ID = localStorage.getItem('grok_session_id') || null;
+  if (!AUTHED) AUTHED = localStorage.getItem('grok_authed') === '1';
+} catch { /* nothing else to do */ }
 
 async function safeFetch(url, opts) {
   try {
