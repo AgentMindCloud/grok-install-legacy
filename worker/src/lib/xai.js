@@ -101,7 +101,7 @@ export async function chatText(env, { systemPrompt, userPrompt, model = 'grok-3'
   return (json?.choices?.[0]?.message?.content ?? '').trim();
 }
 
-export async function generateImage(env, { prompt, model = 'grok-2-image' }) {
+export async function generateImage(env, { prompt, model = 'grok-imagine-image' }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 60000);
   try {

@@ -93,12 +93,13 @@ function escapeXml(s) {
 }
 
 export async function handleMascotPng(genesisId, env) {
-  const buf = await env.GROK_INSTALL_KV.get(`mascot-blob:${genesisId}`, { type: 'arrayBuffer' });
+  const { value: buf, metadata } = await env.GROK_INSTALL_KV.getWithMetadata(`mascot-blob:${genesisId}`, { type: 'arrayBuffer' });
   if (!buf) return error('Not found', 404);
+  const contentType = (metadata && metadata.contentType) || 'image/jpeg';
   return new Response(buf, {
     status: 200,
     headers: {
-      'Content-Type': 'image/png',
+      'Content-Type': contentType,
       'Cache-Control': 'public, max-age=86400',
       'Content-Length': String(buf.byteLength),
     },
@@ -249,7 +250,7 @@ export async function handleGenerateMascot(request, env) {
 
   const promptText = buildMascotPrompt(style, { handle: session.xUsername, profile });
   try {
-    const img = await generateImage(env, { prompt: promptText, model: 'grok-2-image' });
+    const img = await generateImage(env, { prompt: promptText });
     session.mascotRerolls = (session.mascotRerolls ?? 0) + 1;
     await saveSession(env, sessionId, session);
     return json({
@@ -390,8 +391,12 @@ export async function handleMint(request, env) {
       const imgRes = await fetch(imageUrl);
       if (imgRes.ok) {
         const buf = await imgRes.arrayBuffer();
+        const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
         const MASCOT_TTL_S = 90 * 24 * 3600;
-        await env.GROK_INSTALL_KV.put(`mascot-blob:${genesisId}`, buf, { expirationTtl: MASCOT_TTL_S });
+        await env.GROK_INSTALL_KV.put(`mascot-blob:${genesisId}`, buf, {
+          expirationTtl: MASCOT_TTL_S,
+          metadata: { contentType, sourceUrl: imageUrl, savedAt: new Date().toISOString() },
+        });
         const origin = new URL(request.url).origin;
         resolvedMascotUrl = `${origin}/api/mascot/${genesisId}.png`;
       } else {
