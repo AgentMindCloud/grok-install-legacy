@@ -3,7 +3,7 @@
 > Mint personalized AI agents on X. Safety-first. Owner-consent updates. Open source.
 
 [![Built with grok-install](badge.svg)](https://github.com/AgentMindCloud/grok-install)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 ---
 
@@ -113,7 +113,7 @@ PRs welcome. Especially:
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Credits
 
