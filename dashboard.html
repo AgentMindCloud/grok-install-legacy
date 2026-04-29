@@ -1718,14 +1718,22 @@ async function loadSettings() {
     limits: d.limits || { daily_replies: 200, qps: 0.5, daily_usd_cap: 3 },
     blocked: Array.isArray(d.blocked_users) ? d.blocked_users.slice() : [],
   };
+  const emptyPersonality =
+    !(SETTINGS_STATE.personality.voice_traits && SETTINGS_STATE.personality.voice_traits.length) &&
+    !(SETTINGS_STATE.personality.vibe && SETTINGS_STATE.personality.vibe.length);
   body.innerHTML = `
+    ${emptyPersonality ? `
+    <div class="settings-empty-personality" style="padding:14px 18px;margin-bottom:18px;border-radius:12px;border:1px solid var(--border-purple);background:rgba(167,139,250,0.06);font-size:14px;line-height:1.5;color:var(--text-dim);">
+      <strong style="color:var(--text);">Your agent is running on its template defaults.</strong>
+      Customize <em style="font-style:normal;color:var(--purple-bright);">voice</em> and <em style="font-style:normal;color:var(--purple-bright);">vibe</em> below — changes apply on the next reply.
+    </div>` : ''}
     <div class="field-block">
       <label>Voice (comma-separated)</label>
-      <input class="input" id="set-voice" value="${escapeHtml((SETTINGS_STATE.personality.voice_traits || []).join(', '))}">
+      <input class="input" id="set-voice" placeholder="e.g. dry, deadpan, friendly" value="${escapeHtml((SETTINGS_STATE.personality.voice_traits || []).join(', '))}">
     </div>
     <div class="field-block">
       <label>Vibe (comma-separated)</label>
-      <input class="input" id="set-vibe" value="${escapeHtml((SETTINGS_STATE.personality.vibe || []).join(', '))}">
+      <input class="input" id="set-vibe" placeholder="e.g. confident, witty, warm" value="${escapeHtml((SETTINGS_STATE.personality.vibe || []).join(', '))}">
     </div>
     <div class="field-block">
       <label>Mascot style</label>
