@@ -7,8 +7,8 @@
     "scan": "node safety-scanner.js",
     "test": "echo 'safety-scanner disabled (v2.14 uses schemas/v2.14/schema.json validation, run via npm run validate)'",
     "validate": "npx --yes ajv validate -s schemas/v2.14/schema.json -d 'templates/*.yaml' -d grok-install.yaml --spec=draft2020 -c ajv-formats",
-    "deploy": "npx bundle exec jekyll build && wrangler deploy",
-    "preview": "npx bundle exec jekyll build && wrangler dev",
+    "deploy": "npx bundle exec jekyll build && wrangler deploy --config wrangler.pages.jsonc",
+    "preview": "npx bundle exec jekyll build && wrangler dev --config wrangler.pages.jsonc",
     "worker:deploy": "wrangler deploy --config worker/wrangler.toml",
     "worker:dev": "wrangler dev --config worker/wrangler.toml",
     "worker:tail": "wrangler tail --config worker/wrangler.toml"

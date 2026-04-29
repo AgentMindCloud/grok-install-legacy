@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "grok-install-api",
+  "name": "grok-install-pages",
   "compatibility_date": "2026-04-28",
   "observability": {
     "enabled": true
