@@ -2631,14 +2631,16 @@ async function safeFetch(url, opts) {
     } else {
       body = await res.text().catch(() => null);
     }
+    const retryAfterHeader = res.headers.get('Retry-After');
+    const retryAfter = retryAfterHeader ? Math.max(1, parseInt(retryAfterHeader, 10) || 60) : null;
     if (!res.ok) {
       console.warn('fetch failed', url, res.status, body);
-      return { ok: false, status: res.status, body };
+      return { ok: false, status: res.status, body, retryAfter };
     }
-    return { ok: true, status: res.status, body };
+    return { ok: true, status: res.status, body, retryAfter };
   } catch (e) {
     console.warn('fetch error', url, e.message);
-    return { ok: false, status: 0, body: null, error: e.message };
+    return { ok: false, status: 0, body: null, error: e.message, retryAfter: null };
   }
 }
 
@@ -2925,7 +2927,70 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashbo
   if (initial) initial.focus();
 }
 
-function showMintError({ status, body, retry }) {
+function showMintCountdownOverlay({ seconds, retry }) {
+  const previousFocus = document.activeElement;
+  const overlay = document.createElement('div');
+  overlay.setAttribute('role', 'alertdialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(7,9,13,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);';
+  overlay.innerHTML =
+    '<div style="background:#0f141c;border:1px solid rgba(74,222,128,0.35);border-radius:18px;padding:28px;max-width:440px;width:100%;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;text-align:center;">' +
+    '<div style="font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Cooling down</div>' +
+    '<h3 style="color:#4ade80;font-size:20px;margin:0 0 10px;">Just minted a moment ago</h3>' +
+    '<p style="color:#9ca3af;font-size:14px;margin:0 0 18px;line-height:1.5;">Your previous mint is still being processed. Try again in <span id="mc-counter" style="color:#e8ecf2;font-weight:700;">' + seconds + '</span>s.</p>' +
+    '<div style="height:4px;border-radius:999px;background:rgba(74,222,128,0.12);overflow:hidden;margin-bottom:18px;"><div id="mc-bar" style="height:100%;width:100%;background:linear-gradient(90deg,#4ade80,#22ee88);transition:width 1s linear;"></div></div>' +
+    '<div style="display:flex;gap:10px;justify-content:center;">' +
+    '<button id="mc-close" type="button" style="padding:10px 18px;background:#151b26;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#9ca3af;cursor:pointer;">Cancel</button>' +
+    '<button id="mc-retry" type="button" disabled style="padding:10px 18px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:10px;color:#9ca3af;cursor:not-allowed;font-weight:700;">Retry in <span id="mc-retry-counter">' + seconds + '</span>s</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  let remaining = seconds;
+  const total = seconds;
+  const counter = overlay.querySelector('#mc-counter');
+  const retryCounter = overlay.querySelector('#mc-retry-counter');
+  const retryBtn = overlay.querySelector('#mc-retry');
+  const bar = overlay.querySelector('#mc-bar');
+  const tick = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(tick);
+      counter.textContent = '0';
+      retryCounter.textContent = '';
+      retryBtn.disabled = false;
+      retryBtn.style.cursor = 'pointer';
+      retryBtn.style.background = 'linear-gradient(135deg,#4ade80,#22ee88)';
+      retryBtn.style.color = '#07090d';
+      retryBtn.textContent = 'Try again';
+      bar.style.width = '0%';
+      return;
+    }
+    counter.textContent = String(remaining);
+    retryCounter.textContent = String(remaining);
+    bar.style.width = (remaining / total * 100).toFixed(1) + '%';
+  }, 1000);
+  function close() {
+    clearInterval(tick);
+    document.removeEventListener('keydown', onKey);
+    overlay.remove();
+    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(); } }
+  document.addEventListener('keydown', onKey);
+  overlay.querySelector('#mc-close').addEventListener('click', close);
+  retryBtn.addEventListener('click', () => {
+    if (retryBtn.disabled) return;
+    close();
+    if (typeof retry === 'function') retry();
+  });
+}
+
+function showMintError({ status, body, retry, retryAfter }) {
+  // Special case: rate-limited mint with a countdown to retry.
+  if (status === 429 && retry) {
+    showMintCountdownOverlay({ seconds: retryAfter || 60, retry });
+    return;
+  }
   const previousFocus = document.activeElement;
   const detail = (body && (body.error || body.detail)) || '';
   let title = 'Mint failed';
@@ -3053,7 +3118,7 @@ function wireMintButtons() {
           window.location.href = WORKER_URL + '/auth/github/start?session=' + encodeURIComponent(SESSION_ID) + '&return=' + ret;
           return;
         }
-        showMintError({ status: r.status, body: r.body, retry: attemptMint });
+        showMintError({ status: r.status, body: r.body, retry: attemptMint, retryAfter: r.retryAfter });
       }
       attemptMint();
     });

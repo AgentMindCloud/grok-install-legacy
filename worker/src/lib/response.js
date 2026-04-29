@@ -2,6 +2,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Session-Id',
+  'Access-Control-Expose-Headers': 'Retry-After',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -45,8 +46,8 @@ export function redirect(location, status = 302) {
   });
 }
 
-export function error(message, status = 400, extra = {}) {
-  return json({ error: message, ...extra }, { status });
+export function error(message, status = 400, extra = {}, headers = {}) {
+  return json({ error: message, ...extra }, { status, headers });
 }
 
 export function preflight() {

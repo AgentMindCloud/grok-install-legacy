@@ -287,7 +287,12 @@ export async function handleMint(request, env) {
   const lastMintAt = session.lastMintAt ? Date.parse(session.lastMintAt) : 0;
   if (lastMintAt && (Date.now() - lastMintAt) < MINT_COOLDOWN_MS) {
     const waitMs = MINT_COOLDOWN_MS - (Date.now() - lastMintAt);
-    return error(`Slow down — please wait ${Math.ceil(waitMs / 1000)}s before minting again.`, 429);
+    return error(
+      `Slow down — please wait ${Math.ceil(waitMs / 1000)}s before minting again.`,
+      429,
+      {},
+      { 'Retry-After': String(Math.ceil(waitMs / 1000)) }
+    );
   }
 
   const agentName = String(body.agentName || '').trim();
