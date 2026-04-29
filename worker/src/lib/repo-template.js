@@ -38,6 +38,28 @@ function escapeYaml(s) {
   return String(s).replace(/"/g, '\\"');
 }
 
+// Defensive allowlist for tool names emitted into grok-install.yaml.
+// Per Grok's v2.14 Q4 lockdown the runtime only honours these names; emitting
+// any other name silently no-ops at install time, so we'd rather refuse to
+// mint than ship a YAML the runtime will ignore. Update this set if the
+// runtime adds new tools.
+const ALLOWED_TOOLS = new Set([
+  'reply_to_mention',
+  'post_thread',
+  'post_text',
+  'render_preview_card',
+]);
+
+function assertToolsAllowed(yamlText) {
+  for (const m of yamlText.matchAll(/^[ \t]*-[ \t]+name:[ \t]*"([^"]+)"/gm)) {
+    if (!ALLOWED_TOOLS.has(m[1])) {
+      throw new Error(
+        `buildAgentYaml: emitted disallowed tool "${m[1]}". Allowed: ${[...ALLOWED_TOOLS].join(', ')}`
+      );
+    }
+  }
+}
+
 export function buildAgentYaml({
   agentName,
   slug,
@@ -63,7 +85,7 @@ export function buildAgentYaml({
     .replace(/[\r\n]+/g, ' ')
     .slice(0, 200);
 
-  return `---
+  const yaml = `---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/AgentMindCloud/grok-install/main/schemas/v2.14/schema.json
 # Genesis ${genesisId} — minted via grok-install
 # Owner @${ownerHandleClean} — minted at ${new Date().toISOString()}
@@ -154,6 +176,8 @@ x_native_runtime:
   grok_orchestrator: true
   one_click_x_deploy: true
 `;
+  assertToolsAllowed(yaml);
+  return yaml;
 }
 
 export function buildAgentReadme({ agentName, agentHandle, genesisId, description, ownerHandle }) {
