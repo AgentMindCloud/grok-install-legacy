@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { json, error } from '../lib/response.js';
 import { kvGet, kvPut } from '../lib/kv.js';
 import { loadSession, saveSession, requireSession, sessionIdFromRequest } from '../lib/session.js';
@@ -118,14 +119,46 @@ export async function handleSpecimenSvg(genesisId, env) {
   const initial = name.slice(0, 1).toUpperCase();
   const mintedAt = m.mintedAt ? new Date(m.mintedAt).toISOString().slice(0, 10) : '';
 
+  // Try to embed the real Grok-generated mascot as a base64 data URI so the
+  // specimen plate is fully self-contained (downloadable, e-mailable, no live
+  // dependency on /api/mascot/{id}.png). Falls back to the initial-on-gradient
+  // when the blob isn't there yet (mint failed mascot gen, blob TTL expired).
+  let mascotDataUri = null;
+  try {
+    const blob = await env.GROK_INSTALL_KV.getWithMetadata(
+      `mascot-blob:${genesisId}`,
+      { type: 'arrayBuffer' }
+    );
+    if (blob && blob.value) {
+      const ct = (blob.metadata && blob.metadata.contentType) || 'image/jpeg';
+      const b64 = Buffer.from(blob.value).toString('base64');
+      mascotDataUri = `data:${ct};base64,${b64}`;
+    }
+  } catch { /* fall back to gradient */ }
+
+  // Trait chips sit directly under the "VOICE TRAITS" label (no dead band).
   const traitsRow = traits.length
     ? traits.map((t, i) =>
-        `<g transform="translate(${80 + i * 220},1500)">
+        `<g transform="translate(${80 + i * 220},1290)">
           <rect rx="999" ry="999" width="200" height="56" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-opacity="0.35" stroke-width="2"/>
           <text x="100" y="36" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" fill="#c4b5fd">${escapeXml(t)}</text>
         </g>`
       ).join('')
     : '';
+
+  // Mascot block: when we have the real image, draw it inside the rounded
+  // panel via a clipPath so corners stay rounded. Otherwise the gradient +
+  // big initial keeps working as before.
+  const mascotBlock = mascotDataUri
+    ? `<g transform="translate(290,310)">
+        <rect width="500" height="500" rx="40" ry="40" fill="url(#mascot)"/>
+        <image href="${mascotDataUri}" width="500" height="500" clip-path="url(#mascotClip)" preserveAspectRatio="xMidYMid slice"/>
+        <rect width="500" height="500" rx="40" ry="40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+      </g>`
+    : `<g transform="translate(290,310)">
+        <rect width="500" height="500" rx="40" ry="40" fill="url(#mascot)"/>
+        <text x="250" y="350" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="280" font-weight="800" fill="#07090d">${escapeXml(initial)}</text>
+      </g>`;
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
@@ -142,6 +175,9 @@ export async function handleSpecimenSvg(genesisId, env) {
       <stop offset="0" stop-color="#4ade80" stop-opacity="0.25"/>
       <stop offset="1" stop-color="#4ade80" stop-opacity="0"/>
     </radialGradient>
+    <clipPath id="mascotClip">
+      <rect width="500" height="500" rx="40" ry="40"/>
+    </clipPath>
   </defs>
 
   <rect width="1080" height="1920" fill="url(#bg)"/>
@@ -154,10 +190,7 @@ export async function handleSpecimenSvg(genesisId, env) {
 
   <text x="540" y="170" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" letter-spacing="6" fill="#9ca3af">GROK-INSTALL · SPECIMEN PLATE</text>
 
-  <g transform="translate(290,310)">
-    <rect width="500" height="500" rx="40" ry="40" fill="url(#mascot)"/>
-    <text x="250" y="350" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="280" font-weight="800" fill="#07090d">${escapeXml(initial)}</text>
-  </g>
+  ${mascotBlock}
 
   <text x="540" y="950" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="84" font-weight="800" fill="#e8ecf2" letter-spacing="-2">${escapeXml(name)}</text>
   <text x="540" y="1010" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="28" fill="#9ca3af">@${escapeXml(handle)}</text>
