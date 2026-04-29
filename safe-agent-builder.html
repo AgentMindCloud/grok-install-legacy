@@ -452,6 +452,89 @@ nav {
   .lt-composer { padding: 10px 16px 14px; }
 }
 
+/* Item 16 — tester polish */
+.lt-temp {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+  font-size: 11px; font-family: var(--mono); color: var(--text-faint);
+}
+.lt-temp input[type="range"] {
+  flex: 1; min-width: 100px;
+  accent-color: var(--purple-bright);
+}
+.lt-temp-value { color: var(--text-dim); min-width: 26px; text-align: right; }
+.lt-msg-agent .lt-bubble-wrap { display: flex; align-items: flex-end; gap: 6px; max-width: 86%; }
+.lt-msg-agent .lt-bubble-wrap .lt-bubble { max-width: 100%; }
+.lt-regen {
+  flex: 0 0 auto;
+  width: 24px; height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(167,139,250,0.25);
+  background: rgba(167,139,250,0.08);
+  color: var(--purple-bright);
+  font-size: 12px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s ease;
+}
+.lt-msg-agent:hover .lt-regen, .lt-msg-agent:focus-within .lt-regen { opacity: 1; }
+.lt-regen:hover { background: rgba(167,139,250,0.18); }
+.lt-regen:disabled { opacity: 0.3; cursor: not-allowed; }
+.lt-tones {
+  flex: 0 0 auto;
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 22px 6px;
+}
+.lt-tone {
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-faint);
+  font-size: 11px; font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+.lt-tone:hover { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+.lt-tone.active {
+  background: rgba(167,139,250,0.16);
+  border-color: rgba(167,139,250,0.4);
+  color: var(--purple-bright);
+}
+.lt-mint-cta {
+  flex: 0 0 auto;
+  display: flex;
+  margin: 4px 22px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,211,238,0.12));
+  border: 1px solid rgba(74,222,128,0.32);
+  color: var(--text);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  text-align: center;
+  align-items: center; justify-content: center; gap: 6px;
+  transition: transform 0.12s ease, background 0.18s ease;
+}
+.lt-mint-cta:hover {
+  background: linear-gradient(135deg, rgba(74,222,128,0.28), rgba(34,211,238,0.18));
+  transform: translateY(-1px);
+}
+.lt-mint-cta-arrow { color: var(--green); }
+@media (max-width: 480px) {
+  .lt-tones { padding: 0 16px 6px; }
+  .lt-mint-cta { margin: 4px 16px 0; }
+}
+.btn-generate.mint-pulse {
+  animation: mintPulse 1.4s ease-out 2;
+}
+@keyframes mintPulse {
+  0% { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+  70% { box-shadow: 0 0 0 14px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+
 /* Path tabs */
 .path-tabs {
   display: flex; gap: 8px;
@@ -3500,19 +3583,33 @@ document.querySelectorAll('input[type="range"]').forEach(slider => {
   <div class="lt-backdrop" data-action="close" aria-hidden="true"></div>
   <div class="lt-panel">
     <header class="lt-header">
-      <div>
+      <div style="flex:1;min-width:0;">
         <div class="lt-eyebrow">Live tester</div>
         <h3 class="lt-title" id="lt-title">Chat with your future agent</h3>
+        <div class="lt-temp">
+          <label for="lt-temp" style="white-space:nowrap;">Temperature</label>
+          <input id="lt-temp" type="range" min="0" max="1.5" step="0.1" value="0.7" aria-label="Temperature 0 to 1.5">
+          <span class="lt-temp-value" id="lt-temp-value">0.7</span>
+        </div>
       </div>
       <button type="button" class="lt-close" data-action="close" aria-label="Close tester">×</button>
     </header>
     <div class="lt-thread" id="lt-thread" role="log" aria-live="polite"></div>
     <div class="lt-suggestions" id="lt-suggestions"></div>
+    <div class="lt-tones" id="lt-tones" role="group" aria-label="Tone modifiers">
+      <button type="button" class="lt-tone" data-tone="playful">More playful</button>
+      <button type="button" class="lt-tone" data-tone="technical">More technical</button>
+      <button type="button" class="lt-tone" data-tone="shorter">Shorter</button>
+    </div>
     <form class="lt-composer" id="lt-form" autocomplete="off">
       <label for="lt-input" class="sr-only">Message your agent</label>
       <input class="lt-input" id="lt-input" type="text" placeholder="Ask your agent something..." maxlength="500" aria-label="Message">
       <button class="lt-send" id="lt-send" type="submit" aria-label="Send">→</button>
     </form>
+    <button type="button" class="lt-mint-cta" id="lt-mint-cta" data-action="mint-with-this">
+      Mint with this exact personality <span class="lt-mint-cta-arrow" aria-hidden="true">→</span>
+    </button>
+    <div style="height:14px;flex:0 0 auto;"></div>
   </div>
 </aside>
 
@@ -3520,6 +3617,9 @@ document.querySelectorAll('input[type="range"]').forEach(slider => {
 const TESTER = {
   thread: [],
   busy: false,
+  temperature: 0.7,
+  toneDirective: '',
+  toneActive: '',
 
   open() {
     if (!(AUTHED && SESSION_ID)) {
@@ -3572,11 +3672,20 @@ const TESTER = {
       el.innerHTML = '<div class="lt-empty">Send a message to start the conversation. Your agent replies in your voice.<br>Nothing posts to X — this is a private dry run.</div>';
       return;
     }
+    let lastAssistant = -1;
+    for (let i = this.thread.length - 1; i >= 0; i--) {
+      if (this.thread[i].role === 'assistant') { lastAssistant = i; break; }
+    }
     el.innerHTML = this.thread.map((m, i) => {
       const cls = m.role === 'user' ? 'lt-msg lt-msg-user' : 'lt-msg lt-msg-agent';
-      const bubbleCls = (m.role === 'assistant' && m.content === '...') ? 'lt-bubble lt-thinking' : 'lt-bubble';
-      const text = m.content === '...' ? 'thinking…' : m.content;
-      return '<div class="' + cls + '"><div class="' + bubbleCls + '">' + escapeHtmlBuilder(text) + '</div></div>';
+      const isThinking = m.role === 'assistant' && m.content === '...';
+      const bubbleCls = isThinking ? 'lt-bubble lt-thinking' : 'lt-bubble';
+      const text = isThinking ? 'thinking…' : m.content;
+      const showRegen = m.role === 'assistant' && i === lastAssistant && !isThinking;
+      const inner = '<div class="' + bubbleCls + '">' + escapeHtmlBuilder(text) + '</div>'
+        + (showRegen ? '<button class="lt-regen" type="button" aria-label="Regenerate this reply" data-action="regen">↻</button>' : '');
+      const wrap = m.role === 'assistant' ? '<div class="lt-bubble-wrap">' + inner + '</div>' : inner;
+      return '<div class="' + cls + '">' + wrap + '</div>';
     }).join('');
     el.scrollTop = el.scrollHeight;
   },
@@ -3613,6 +3722,15 @@ const TESTER = {
     const templateName = templateEl ? (templateEl.value || templateEl.dataset.template || '') : '';
     const customDesc = ((document.querySelector('textarea[name="description"]') || {}).value || '').trim();
     const sendable = this.thread.filter(m => m.content !== '...').map(m => ({ role: m.role, content: m.content }));
+    if (this.toneDirective && sendable.length) {
+      const last = sendable[sendable.length - 1];
+      if (last.role === 'user') last.content = last.content + ' ' + this.toneDirective;
+    }
+    const tempForRequest = this.temperature;
+    const usedTone = this.toneActive;
+    this.toneDirective = '';
+    this.toneActive = '';
+    document.querySelectorAll('.lt-tone').forEach(b => b.classList.remove('active'));
 
     try {
       const r = await safeFetch(WORKER_URL + '/api/test-agent', {
@@ -3629,6 +3747,7 @@ const TESTER = {
           custom_description: customDesc,
           agent_name: ((nameField || {}).value || '').trim(),
           agent_handle: ((handleField || {}).value || '').trim(),
+          temperature: tempForRequest,
         }),
       });
       if (r.ok && r.body && r.body.reply) {
@@ -3650,6 +3769,53 @@ const TESTER = {
       try { document.getElementById('lt-input').focus(); } catch {}
     }
   },
+
+  applyTone(tone) {
+    const map = {
+      playful:   '(reply with a more playful, lighter tone)',
+      technical: '(reply more technically — like a senior engineer explaining)',
+      shorter:   '(keep the reply to 1–2 short sentences max)',
+    };
+    if (this.toneActive === tone) {
+      this.toneActive = '';
+      this.toneDirective = '';
+    } else {
+      this.toneActive = tone;
+      this.toneDirective = map[tone] || '';
+    }
+    document.querySelectorAll('.lt-tone').forEach(b => {
+      b.classList.toggle('active', b.dataset.tone === this.toneActive);
+    });
+  },
+
+  async regenerate() {
+    if (this.busy || this.thread.length === 0) return;
+    let lastAssistantIdx = -1;
+    for (let i = this.thread.length - 1; i >= 0; i--) {
+      if (this.thread[i].role === 'assistant') { lastAssistantIdx = i; break; }
+    }
+    if (lastAssistantIdx < 0) return;
+    this.thread = this.thread.slice(0, lastAssistantIdx);
+    if (this.thread.length === 0 || this.thread[this.thread.length - 1].role !== 'user') return;
+    const lastUser = this.thread.pop();
+    this.persist();
+    this.send(lastUser.content);
+  },
+
+  mintWithThis() {
+    this.close();
+    setTimeout(() => {
+      const mintBtn = document.querySelector('.btn-generate');
+      if (mintBtn) {
+        mintBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        mintBtn.classList.remove('mint-pulse');
+        // Re-flow so the animation re-triggers
+        void mintBtn.offsetWidth;
+        mintBtn.classList.add('mint-pulse');
+        try { mintBtn.focus({ preventScroll: true }); } catch {}
+      }
+    }, 320);
+  },
 };
 
 function wireLiveTester() {
@@ -3660,7 +3826,10 @@ function wireLiveTester() {
   });
   panel.addEventListener('click', (e) => {
     const a = e.target.closest('[data-action]');
-    if (a && a.dataset.action === 'close') TESTER.close();
+    if (!a) return;
+    if (a.dataset.action === 'close') TESTER.close();
+    else if (a.dataset.action === 'mint-with-this') TESTER.mintWithThis();
+    else if (a.dataset.action === 'regen') TESTER.regenerate();
   });
   const form = document.getElementById('lt-form');
   if (form) form.addEventListener('submit', (e) => {
@@ -3673,6 +3842,20 @@ function wireLiveTester() {
     const b = e.target.closest('[data-sug]');
     if (b) TESTER.send(b.dataset.sug);
   });
+  const tones = document.getElementById('lt-tones');
+  if (tones) tones.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tone]');
+    if (b) TESTER.applyTone(b.dataset.tone);
+  });
+  const tempSlider = document.getElementById('lt-temp');
+  const tempValue = document.getElementById('lt-temp-value');
+  if (tempSlider && tempValue) {
+    tempSlider.addEventListener('input', () => {
+      const v = parseFloat(tempSlider.value);
+      TESTER.temperature = isNaN(v) ? 0.7 : v;
+      tempValue.textContent = TESTER.temperature.toFixed(1);
+    });
+  }
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !panel.hidden) TESTER.close();
   });
