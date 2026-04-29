@@ -5,7 +5,7 @@ import { handleManifestCallback, handleSetupApp } from './handlers/manifest.js';
 import {
   handleHealth, handleStats, handleWall, handleMintLookup,
   handleAnalyzeProfile, handleGenerateMascot, handleMint, handleStarTemplate,
-  handleSpecimenSvg, handleMascotPng,
+  handleSpecimenSvg, handleMascotPng, handleTestAgent,
 } from './handlers/api.js';
 import {
   handleDashboardAgents, handleDashboardOverview,
@@ -59,6 +59,7 @@ async function route(request, env, ctx) {
   if (pathname === '/api/generate-mascot' && method === 'POST') return handleGenerateMascot(request, env);
   if (pathname === '/api/mint' && method === 'POST') return handleMint(request, env);
   if (pathname === '/api/star-template' && method === 'POST') return handleStarTemplate(request, env);
+  if (pathname === '/api/test-agent' && method === 'POST') return handleTestAgent(request, env);
 
   const mintLookup = pathname.match(/^\/api\/mint\/(GA-[A-Z0-9]{8})$/);
   if (mintLookup && method === 'GET') return handleMintLookup(mintLookup[1], env);

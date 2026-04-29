@@ -2,7 +2,7 @@ import { json, error } from '../lib/response.js';
 import { kvGet, kvPut } from '../lib/kv.js';
 import { loadSession, saveSession, requireSession, sessionIdFromRequest } from '../lib/session.js';
 import { generateGenesisId, bumpDailyCounter, getStats } from '../lib/genesis.js';
-import { chatJson, chatText, generateImage } from '../lib/xai.js';
+import { chatJson, chatText, chatMessages, generateImage } from '../lib/xai.js';
 import { profileAnalyzerPrompt, sampleReplyPrompt, safeProfileDefaults, safeSampleReply } from '../lib/prompts.js';
 import { buildMascotPrompt, isValidStyle, buildXIntentForMascot } from '../lib/mascots.js';
 import { buildMintRepoFiles } from '../lib/repo-template.js';
@@ -471,4 +471,113 @@ export async function handleStarTemplate(request, env) {
   const owner = env.GITHUB_OWNER_ORG || 'AgentMindCloud';
   const ok = await starRepo(session.ghToken, owner, 'grok-install');
   return json({ starred: ok });
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Live Agent Tester — chat with the user's draft personality before mint.
+// Powers the slide-in tester panel in safe-agent-builder.html (item 15).
+// ────────────────────────────────────────────────────────────────────────
+
+const TEST_AGENT_RL_KEY = (sid) => `test-agent-bucket:${sid}`;
+const TEST_AGENT_RL_WINDOW_S = 300; // 5 minutes
+const TEST_AGENT_RL_MAX = 10;
+
+function buildTestAgentSystemPrompt({ agentName, agentHandle, voiceTraits, domains, vibe, signaturePhrases, template, customDescription }) {
+  const lines = [
+    `You are ${agentName || 'an X-native AI agent'}, posting from @${(agentHandle || 'agent').replace(/^@/, '')}.`,
+  ];
+  if (voiceTraits.length) lines.push(`Voice traits: ${voiceTraits.join(', ')}.`);
+  if (domains.length) lines.push(`Topics you focus on: ${domains.join(', ')}.`);
+  if (vibe.length) lines.push(`Overall vibe: ${vibe.join(', ')}.`);
+  if (signaturePhrases.length) lines.push(`Signature phrases (use sparingly, never every reply): ${signaturePhrases.join(', ')}.`);
+  if (template) lines.push(`Template style: ${template}.`);
+  if (customDescription) lines.push(`Owner brief: ${customDescription}`);
+  lines.push(
+    'Reply rules: max 280 characters; sound like the owner described above; be specific and opinionated; no hashtags unless explicitly asked; never mention being an AI unless directly asked.'
+  );
+  return lines.join(' ');
+}
+
+export async function handleTestAgent(request, env) {
+  let body = {};
+  try { body = await request.json(); } catch { return error('Invalid JSON body', 400); }
+  const sessionId = body.sessionId || sessionIdFromRequest(request);
+  let session;
+  try { session = await requireSession(env, sessionId); } catch (e) { return error(e.message, e.status || 401); }
+
+  // Validate messages array.
+  const messages = Array.isArray(body.messages) ? body.messages : [];
+  if (messages.length === 0) return error('messages array is required and must contain at least one user message', 400);
+  if (messages.length > 16) return error('messages array too long (max 16 turns)', 400);
+  for (const m of messages) {
+    if (!m || typeof m !== 'object' || (m.role !== 'user' && m.role !== 'assistant') || typeof m.content !== 'string') {
+      return error('Each message must be { role: "user"|"assistant", content: string }', 400);
+    }
+    if (m.content.length > 2000) return error('Each message content must be ≤ 2000 characters', 400);
+  }
+
+  // Soft rate-limit per session: 10 messages per rolling 5 minutes.
+  const now = Date.now();
+  let bucket = null;
+  try { bucket = await env.GROK_INSTALL_KV.get(TEST_AGENT_RL_KEY(sessionId), { type: 'json' }); } catch { /* fail open */ }
+  if (bucket && bucket.resetAt > now) {
+    if ((bucket.count || 0) >= TEST_AGENT_RL_MAX) {
+      const retryS = Math.ceil((bucket.resetAt - now) / 1000);
+      return error(
+        `Tester rate limit: max ${TEST_AGENT_RL_MAX} messages per 5 min. Try again in ${retryS}s.`,
+        429,
+        { retry_after_s: retryS },
+        { 'Retry-After': String(retryS) }
+      );
+    }
+  } else {
+    bucket = { count: 0, resetAt: now + TEST_AGENT_RL_WINDOW_S * 1000 };
+  }
+
+  // Build system prompt from the draft personality.
+  const voiceTraits = Array.isArray(body.voice_traits) ? body.voice_traits.filter(t => typeof t === 'string').slice(0, 8) : [];
+  const domains = Array.isArray(body.domains) ? body.domains.filter(t => typeof t === 'string').slice(0, 8) : [];
+  const vibe = Array.isArray(body.vibe) ? body.vibe.filter(t => typeof t === 'string').slice(0, 4) : [];
+  const signaturePhrases = Array.isArray(body.signature_phrases) ? body.signature_phrases.filter(t => typeof t === 'string').slice(0, 4) : [];
+  const template = (typeof body.template === 'string' ? body.template : '').slice(0, 60);
+  const customDescription = (typeof body.custom_description === 'string' ? body.custom_description : '').slice(0, 500);
+  const agentName = (typeof body.agent_name === 'string' ? body.agent_name : '').slice(0, 60);
+  const agentHandle = (typeof body.agent_handle === 'string' ? body.agent_handle : session.xUsername || '').slice(0, 30);
+
+  const systemPrompt = buildTestAgentSystemPrompt({
+    agentName, agentHandle, voiceTraits, domains, vibe, signaturePhrases, template, customDescription,
+  });
+
+  const reqModel = typeof body.model === 'string' && body.model ? body.model : 'grok-3';
+  const reqTemp = typeof body.temperature === 'number' ? Math.max(0, Math.min(1.5, body.temperature)) : 0.7;
+
+  const t0 = Date.now();
+  let result;
+  try {
+    result = await chatMessages(env, {
+      systemPrompt,
+      messages,
+      model: reqModel,
+      temperature: reqTemp,
+      maxTokens: 280,
+    });
+  } catch (e) {
+    return error(`Test agent call failed: ${e.message}`, 502);
+  }
+  const latencyMs = Date.now() - t0;
+
+  // Increment rate-limit bucket (fail open).
+  try {
+    bucket.count = (bucket.count || 0) + 1;
+    await env.GROK_INSTALL_KV.put(TEST_AGENT_RL_KEY(sessionId), JSON.stringify(bucket), {
+      expirationTtl: TEST_AGENT_RL_WINDOW_S + 5,
+    });
+  } catch { /* fail open */ }
+
+  return json({
+    reply: result.text,
+    tokens_used: result.usage ? (result.usage.total_tokens || result.usage.completion_tokens || 0) : null,
+    latency_ms: latencyMs,
+    model: reqModel,
+  });
 }

@@ -101,6 +101,25 @@ export async function chatText(env, { systemPrompt, userPrompt, model = 'grok-3'
   return (json?.choices?.[0]?.message?.content ?? '').trim();
 }
 
+// Like chatText, but accepts a multi-turn `messages` array prepended with the
+// system prompt. Returns { text, usage } so callers can surface token counts.
+export async function chatMessages(env, { systemPrompt, messages, model = 'grok-3', temperature = 0.7, maxTokens = 280 }) {
+  const body = {
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages,
+    ],
+    temperature,
+    max_tokens: maxTokens,
+  };
+  const json = await chatRequest(env, body);
+  return {
+    text: (json?.choices?.[0]?.message?.content ?? '').trim(),
+    usage: json?.usage || null,
+  };
+}
+
 export async function generateImage(env, { prompt, model = 'grok-imagine-image' }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 60000);
