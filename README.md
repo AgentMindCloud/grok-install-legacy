@@ -79,6 +79,9 @@ Full details: [SAFETY.md](SAFETY.md)
 
 ## Quickstart (developers)
 
+Python 3.10+ required. `grok-install` is a **Python CLI** — install it from
+PyPI with `pip` or `uv`:
+
 ```bash
 git clone https://github.com/AgentMindCloud/grok-install
 cd grok-install
