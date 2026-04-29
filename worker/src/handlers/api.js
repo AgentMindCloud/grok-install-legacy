@@ -89,6 +89,19 @@ function escapeXml(s) {
     .replace(/'/g, '&apos;');
 }
 
+export async function handleMascotPng(genesisId, env) {
+  const buf = await env.GROK_INSTALL_KV.get(`mascot-blob:${genesisId}`, { type: 'arrayBuffer' });
+  if (!buf) return error('Not found', 404);
+  return new Response(buf, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400',
+      'Content-Length': String(buf.byteLength),
+    },
+  });
+}
+
 export async function handleSpecimenSvg(genesisId, env) {
   const m = await kvGet(env, `mint:${genesisId}`);
   if (!m) return error('Not found', 404);
@@ -365,6 +378,27 @@ export async function handleMint(request, env) {
     return error(`Commit failed: ${e.message}`, 502, { repoUrl: repo.html_url });
   }
 
+  // Generate mascot via Grok image API. Failure is non-fatal — mascotUrl stays null.
+  let resolvedMascotUrl = mascotUrl;
+  try {
+    const prompt = buildMascotPrompt(mascotStyle, { handle: agentHandle, profile });
+    const { url: imageUrl } = await generateImage(env, { prompt });
+    if (imageUrl) {
+      const imgRes = await fetch(imageUrl);
+      if (imgRes.ok) {
+        const buf = await imgRes.arrayBuffer();
+        const MASCOT_TTL_S = 90 * 24 * 3600;
+        await env.GROK_INSTALL_KV.put(`mascot-blob:${genesisId}`, buf, { expirationTtl: MASCOT_TTL_S });
+        const origin = new URL(request.url).origin;
+        resolvedMascotUrl = `${origin}/api/mascot/${genesisId}.png`;
+      } else {
+        console.warn('mint: mascot fetch non-ok', imgRes.status);
+      }
+    }
+  } catch (e) {
+    console.warn('mint: mascot generation failed (non-fatal):', e.message);
+  }
+
   const mintedAt = new Date().toISOString();
   const mintRecord = {
     genesisId,
@@ -374,7 +408,7 @@ export async function handleMint(request, env) {
     agentHandle,
     description,
     mascotStyle,
-    mascotUrl,
+    mascotUrl: resolvedMascotUrl,
     profile,
     optInWall,
     source,
