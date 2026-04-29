@@ -42,7 +42,10 @@ export async function handleWall(request, env) {
       genesisId: m.genesisId,
       xUsername: m.xUsername,
       agentHandle: m.agentHandle,
+      agentName: m.agentName,
+      mascotStyle: m.mascotStyle,
       mascotUrl: m.mascotUrl,
+      repoUrl: m.repoUrl,
       mintedAt: m.mintedAt,
     });
   }

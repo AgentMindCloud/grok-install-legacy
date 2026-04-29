@@ -2031,7 +2031,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <div class="dna-overlay" role="dialog" aria-label="Sign in to see your Voice DNA">
             <h3>Sign in with X to see your Voice DNA</h3>
             <p>We read your bio and recent posts to extract your voice traits, domains, and vibe — then mirror them in your agent. Read-only access. No posts on your behalf, ever.</p>
-            <button type="button" class="btn-signin-overlay btn-signin">Sign in with X (read-only)</button>
+            <a class="btn-signin-overlay btn-signin" href="https://grok-install-api.jani-starck2.workers.dev/auth/x/start" data-bypass-js="1">Sign in with X (read-only)</a>
             <p style="font-size: 11px; color: var(--text-faint); font-family: var(--mono);">The card below is a placeholder until you sign in.</p>
           </div>
           <div class="dna-header">
@@ -3004,9 +3004,18 @@ function wireMintButtons() {
 }
 
 (async function init() {
+  // Synchronous up-front: bind sign-in handlers and reflect AUTHED state
+  // immediately so the overlay disappears on signed-in page loads, even if
+  // /api/analyze-profile is slow or fails. Avoids the "I signed in but the
+  // overlay is still there so I think nothing happened" trap.
+  try { wireSignIn(); } catch {}
+  try {
+    const dnaCard = document.getElementById('dna-card');
+    if (dnaCard && AUTHED && SESSION_ID) dnaCard.classList.add('authed');
+  } catch {}
+
   try { await loadStats(); } catch {}
   try { await loadWall(); } catch {}
-  try { wireSignIn(); } catch {}
   try {
     const r = await (async () => {
       if (!(AUTHED && SESSION_ID)) return null;
