@@ -9,8 +9,8 @@ installed through it.
 The standard, the CLI (`grok-install-cli`), the VS Code extension
 (`grok-install-vscode`), the GitHub Action (`grok-install-action`), the
 schemas, the landing page, and all associated code are provided **"AS IS"**
-under the [MIT License](LICENSE), without warranty of any kind —
-express or implied. See the license for the full
+under the [Apache License 2.0](LICENSE), without warranty of any kind —
+express or implied. See Sections 7 and 8 of the license for the full
 disclaimer of warranty and limitation of liability.
 
 ## Safety-Scan Boundaries

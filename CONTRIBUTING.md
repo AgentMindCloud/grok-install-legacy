@@ -102,4 +102,4 @@ python -m http.server 8000
 ## License
 
 By contributing you agree that your contributions will be licensed under the
-[MIT License](LICENSE) — the same license as the project.
+[Apache License 2.0](LICENSE) — the same license as the project.
