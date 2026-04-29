@@ -287,10 +287,31 @@ nav {
 .path-tab-title { font-size: 15px; font-weight: 600; line-height: 1.2; }
 .path-tab-sub { font-size: 12px; color: var(--text-faint); font-weight: 400; line-height: 1.3; }
 .path-tab.active .path-tab-sub { color: var(--text-dim); }
+.path-tab-desc {
+  display: none;
+  font-size: 12.5px; line-height: 1.5;
+  color: var(--text-faint);
+  margin-top: 8px;
+  font-weight: 400;
+}
+.path-tabs-big .path-tab-desc { display: block; }
+.path-tabs-big .path-tab.active .path-tab-desc { color: var(--text-dim); }
+.path-tabs-big {
+  max-width: 880px;
+  padding: 8px;
+  gap: 10px;
+}
+.path-tabs-big .path-tab { padding: 22px 24px; align-items: flex-start; }
+.path-tabs-big .path-tab-icon { width: 42px; height: 42px; font-size: 22px; margin-top: 2px; }
+.path-tabs-big .path-tab-title { font-size: 16px; }
+.path-tabs-big:has(.path-tab.active) .path-tab:not(.active) { opacity: 0.55; }
+.path-tabs-big:has(.path-tab.active) .path-tab:not(.active):hover { opacity: 0.85; }
 
 @media (max-width: 700px) {
   .path-tabs { flex-direction: column; }
   .path-tab { padding: 14px 18px; }
+  .path-tabs-big .path-tab { padding: 18px 18px; }
+  .path-tabs-big .path-tab-desc { font-size: 12px; }
 }
 
 /* Layout grid */
@@ -1191,6 +1212,20 @@ input[type="range"]::-moz-range-thumb {
   padding-top: 48px;
   border-top: 1px solid var(--border);
 }
+.wall-section.wall-inline {
+  margin-top: 0;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.04), rgba(34, 211, 238, 0.03));
+  border: 1px solid var(--border-purple);
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+.wall-section.wall-inline .wall-head { margin-bottom: 14px; }
+.wall-section.wall-inline h2 { font-size: 22px; }
+.wall-section.wall-inline .wall-eyebrow { margin-bottom: 8px; }
+.wall-section.wall-inline .wall-empty { padding: 22px 18px; max-width: none; margin: 0; }
+.wall-section.wall-inline .wall-empty-mark { width: 36px; height: 36px; margin-bottom: 10px; font-size: 18px; }
+.wall-section.wall-inline .wall-empty-text { font-size: 15px; }
 .wall-head {
   text-align: center;
   margin-bottom: 28px;
@@ -1265,6 +1300,63 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 .footer-line { margin-bottom: 14px; }
 .footer-links {
   display: flex; justify-content: center; gap: 24px;
+}
+
+/* In-flow stepper (Phase F3) */
+.flow-stepper {
+  position: sticky; top: 12px; z-index: 20;
+  display: flex; gap: 4px;
+  padding: 6px;
+  margin-bottom: 18px;
+  background: rgba(15, 20, 28, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+}
+.flow-step-pill {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-faint);
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+.flow-step-pill i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--bg-elev-2);
+  color: var(--text-faint);
+  font-style: normal; font-size: 10px; font-weight: 600;
+}
+.flow-step-pill[data-step="1"] i::before { content: "1"; }
+.flow-step-pill[data-step="2"] i::before { content: "2"; }
+.flow-step-pill[data-step="3"] i::before { content: "3"; }
+.flow-step-pill[data-step="4"] i::before { content: "4"; }
+.flow-step-pill[data-step="5"] i::before { content: "5"; }
+.flow-step-pill.active {
+  background: rgba(74, 222, 128, 0.08);
+  border-color: var(--border-strong);
+  color: var(--green);
+}
+.flow-step-pill.active i { background: var(--green); color: var(--bg); box-shadow: 0 0 8px rgba(74,222,128,0.5); }
+.flow-step-pill.completed { color: var(--text-dim); }
+.flow-step-pill.completed i { background: var(--green-deep); color: var(--bg); }
+.flow-step-pill.completed i::before { content: "✓" !important; }
+.flow-step-pill:hover { background: rgba(255,255,255,0.04); }
+.flow-step-pill:focus-visible { outline: 2px solid rgba(74,222,128,0.4); outline-offset: 2px; }
+@media (max-width: 700px) {
+  .flow-stepper { padding: 4px; gap: 2px; }
+  .flow-step-pill { padding: 8px 4px; font-size: 10px; gap: 4px; }
+  .flow-step-pill span { display: none; }
+  .flow-step-pill.active span { display: inline; font-size: 10px; }
+  .flow-step-pill i { width: 18px; height: 18px; font-size: 9px; }
 }
 
 /* Hide flow that isn't active */
@@ -1565,8 +1657,8 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <span class="dot"></span>
       99% pre-approved by Grok safety scan
     </div>
-    <h1>Build a <span class="gradient">Safe Agent</span><br>in 60 seconds</h1>
-    <p class="hero-tagline">Build your <strong>free unique AI agent</strong> from your X signal, or pick one of the templates. Ship to Grok with one tweet. Zero code.</p>
+    <h1>AI AGENT MINTED FROM<br><span class="gradient">YOUR X SIGNAL</span></h1>
+    <p class="hero-tagline">Unique, security checked &amp; <strong>100% yours.</strong></p>
     <div class="hero-counter">
       <span class="stat"><span class="live"></span> <span class="num">0</span> agents minted</span>
       <span style="color: var(--text-mute);">·</span>
@@ -1577,12 +1669,13 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
   </section>
 
   <!-- PATH SELECTOR -->
-  <div class="path-tabs">
+  <div class="path-tabs path-tabs-big">
     <button class="path-tab purple active" data-flow="signal">
       <div class="path-tab-icon">⚡</div>
       <div class="path-tab-content">
         <div class="path-tab-title">Mint from your X signal</div>
         <div class="path-tab-sub">One-of-a-kind · ~90 seconds</div>
+        <div class="path-tab-desc">Sign in with X. We analyze your voice and style, you get an agent that sounds exactly like you with a unique Genesis ID.</div>
       </div>
     </button>
     <button class="path-tab" data-flow="template">
@@ -1590,6 +1683,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <div class="path-tab-content">
         <div class="path-tab-title">Pick a template</div>
         <div class="path-tab-sub">Pre-tuned · 60 seconds</div>
+        <div class="path-tab-desc">Choose from 8 ready-made agents — brand assistant, market signals, dev help, daily brief, and more.</div>
       </div>
     </button>
   </div>
@@ -1720,15 +1814,36 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 </section>
 
   <!-- end user-flow diagram -->
+
+  <!-- Recently minted preview (Phase F10) — full wall still rendered below -->
+  <section class="wall-section wall-inline" id="wall-preview" aria-label="Recently minted preview">
+    <div class="wall-head">
+      <div class="wall-eyebrow"><span class="dot"></span> Recently minted</div>
+      <h2>Live on <span class="accent">X</span></h2>
+    </div>
+    <div class="wall-empty" id="wall-preview-empty">
+      <div class="wall-empty-mark">·</div>
+      <div class="wall-empty-text">The wall is quiet.</div>
+      <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
+    </div>
+  </section>
+
   <div class="workspace">
     <!-- LEFT: WIZARD AREA -->
     <div>
 
       <!-- ============ X SIGNAL FLOW ============ -->
       <div class="flow-panel active" data-flow="signal">
+        <div class="flow-stepper">
+          <button type="button" class="flow-step-pill active" data-step="1"><i></i><span>Sign in</span></button>
+          <button type="button" class="flow-step-pill" data-step="2"><i></i><span>Voice DNA</span></button>
+          <button type="button" class="flow-step-pill" data-step="3"><i></i><span>Mascot</span></button>
+          <button type="button" class="flow-step-pill" data-step="4"><i></i><span>Name</span></button>
+          <button type="button" class="flow-step-pill" data-step="5"><i></i><span>Mint</span></button>
+        </div>
 
         <!-- Sign in card -->
-        <div class="signin-card">
+        <div class="signin-card" data-step="1">
           <div class="signin-icon">𝕏</div>
           <h2>Mint an AI from <span class="gradient">your signal</span></h2>
           <p class="desc">Sign in with X. We analyze your voice, interests, and style. You get a one-of-a-kind agent that sounds like you, with a unique Genesis ID.</p>
@@ -1744,7 +1859,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Voice DNA reveal -->
-        <div class="dna-card">
+        <div class="dna-card" data-step="2">
           <div class="dna-header">
             <div>
               <div class="dna-handle"><span class="at">@</span><span class="name">JanSol0s</span></div>
@@ -1798,7 +1913,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Mascot picker -->
-        <div class="card">
+        <div class="card" data-step="3">
           <div class="step-header">
             <div class="step-num purple">M</div>
             <div class="step-info">
@@ -1848,7 +1963,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Bot handle + name -->
-        <div class="card">
+        <div class="card" data-step="4">
           <div class="step-header">
             <div class="step-num purple">N</div>
             <div class="step-info">
@@ -1871,7 +1986,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Wall opt-in -->
-        <div class="card">
+        <div class="card" data-step="5">
           <div class="step-header">
             <div class="step-num purple">W</div>
             <div class="step-info">
@@ -1909,9 +2024,16 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 
       <!-- ============ TEMPLATE FLOW ============ -->
       <div class="flow-panel" data-flow="template">
+        <div class="flow-stepper">
+          <button type="button" class="flow-step-pill active" data-step="1"><i></i><span>Pick</span></button>
+          <button type="button" class="flow-step-pill" data-step="2"><i></i><span>Customize</span></button>
+          <button type="button" class="flow-step-pill" data-step="3"><i></i><span>Limits</span></button>
+          <button type="button" class="flow-step-pill" data-step="4"><i></i><span>Brain</span></button>
+          <button type="button" class="flow-step-pill" data-step="5"><i></i><span>Mint</span></button>
+        </div>
 
         <!-- STEP 1: Pick template -->
-        <div class="card">
+        <div class="card" data-step="1">
           <div class="step-header">
             <div class="step-num">1</div>
             <div class="step-info">
@@ -1980,7 +2102,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- STEP 2: Make it yours -->
-        <div class="card">
+        <div class="card" data-step="2">
           <div class="step-header">
             <div class="step-num">2</div>
             <div class="step-info">
@@ -2028,7 +2150,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- STEP 3: Set limits -->
-        <div class="card">
+        <div class="card" data-step="3">
           <div class="step-header">
             <div class="step-num">3</div>
             <div class="step-info">
@@ -2072,7 +2194,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- STEP 4: Brain + tools -->
-        <div class="card">
+        <div class="card" data-step="4">
           <div class="step-header">
             <div class="step-num">4</div>
             <div class="step-info">
@@ -2133,7 +2255,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Safety checklist -->
-        <div class="safety-check" id="safety">
+        <div class="safety-check" id="safety" data-step="5">
           <div class="safety-head">
             <svg class="safety-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
             <h3>X Platform Safety Checklist</h3>
@@ -2320,8 +2442,7 @@ async function loadWall() {
   if (!r.ok || !r.body) return;
   const wall = Array.isArray(r.body.wall) ? r.body.wall : [];
   if (wall.length > 0) {
-    const empty = document.querySelector('.wall-empty');
-    if (empty) empty.style.display = 'none';
+    document.querySelectorAll('.wall-empty').forEach(el => { el.style.display = 'none'; });
   }
 }
 
@@ -2403,6 +2524,7 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
   overlay.innerHTML =
     '<div style="background:#0f141c;border:1px solid rgba(74,222,128,0.3);border-radius:18px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;">' +
     '<h2 id="mint-overlay-title" style="color:#4ade80;font-size:24px;margin:0 0 8px;">Minted!</h2>' +
+    '<p style="color:#e8ecf2;font-size:13px;margin:0 0 14px;padding:10px 12px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:10px;"><strong style="color:#4ade80;">100% yours.</strong> No one — not even us — can change this agent without your explicit consent.</p>' +
     '<p style="color:#9ca3af;margin:0 0 16px;">Your agent is live. Genesis ID:</p>' +
     '<div style="font-family:JetBrains Mono,monospace;font-size:18px;color:#c4b5fd;background:rgba(167,139,250,0.12);padding:10px 14px;border-radius:10px;display:inline-block;margin-bottom:18px;">' + escapeHtml(genesisId || 'GA-XXXXXXXX') + '</div>' +
     '<p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Repo:</p>' +
@@ -2618,6 +2740,45 @@ document.querySelectorAll('.path-tab').forEach(tab => {
     window.scrollTo({ top: document.querySelector('.path-tabs').offsetTop - 20, behavior: 'smooth' });
   });
 });
+
+// In-flow stepper wiring (Phase F3)
+function wireFlowStepper(panel) {
+  const stepper = panel.querySelector('.flow-stepper');
+  if (!stepper) return;
+  const pills = Array.from(stepper.querySelectorAll('.flow-step-pill'));
+  const stepEls = Array.from(panel.querySelectorAll('[data-step]')).filter(el => !el.classList.contains('flow-step-pill'));
+  if (!stepEls.length) return;
+  const intersecting = new Map();
+  function setActive(stepNum) {
+    pills.forEach(p => {
+      const n = parseInt(p.dataset.step, 10);
+      p.classList.toggle('active', n === stepNum);
+      p.classList.toggle('completed', n < stepNum);
+    });
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => intersecting.set(e.target, e.isIntersecting));
+    let activeStep = 1;
+    for (const [el, isInter] of intersecting) {
+      if (isInter) {
+        const n = parseInt(el.dataset.step, 10);
+        if (n > activeStep) activeStep = n;
+      }
+    }
+    setActive(activeStep);
+  }, { rootMargin: '0px 0px -75% 0px', threshold: 0 });
+  stepEls.forEach(el => observer.observe(el));
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const target = panel.querySelector(`[data-step="${pill.dataset.step}"]:not(.flow-step-pill)`);
+      if (target) {
+        const top = target.getBoundingClientRect().top + window.scrollY - 90;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+}
+document.querySelectorAll('.flow-panel').forEach(wireFlowStepper);
 
 // Template card selection (template flow only)
 document.querySelectorAll('.template-card').forEach(card => {
