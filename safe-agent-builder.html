@@ -3004,11 +3004,26 @@ function wireMintButtons() {
 }
 
 (async function init() {
-  // Synchronous up-front: bind sign-in handlers and reflect AUTHED state
-  // immediately so the overlay disappears on signed-in page loads, even if
-  // /api/analyze-profile is slow or fails. Avoids the "I signed in but the
-  // overlay is still there so I think nothing happened" trap.
+  // Synchronous up-front: bind ALL handlers and reflect AUTHED state
+  // immediately. The user can interact (sign in, switch tabs, click mint)
+  // before any async fetch completes.
   try { wireSignIn(); } catch {}
+  try { wireMintButtons(); } catch {}
+  try {
+    document.querySelectorAll('input[name="agent-name"]').forEach(el => {
+      el.addEventListener('input', () => { el.dataset.userTouched = '1'; });
+    });
+    // Clear the seed value 'JanSol0sAI' ONLY if the user is not signed in.
+    // If signed in, updateDnaCard will set ${handle}AI; until profile loads,
+    // we leave the seed in place rather than blanking the field (which would
+    // cause "Pick a display name first" errors on rapid mint clicks).
+    const signalPanel = document.querySelector('.flow-panel[data-flow="signal"]');
+    const signalName = signalPanel ? signalPanel.querySelector('input[name="agent-name"]') : null;
+    if (signalName && !(AUTHED && SESSION_ID) && signalName.value === 'JanSol0sAI') {
+      signalName.value = '';
+      signalName.placeholder = 'YourHandleAI';
+    }
+  } catch {}
   try {
     const dnaCard = document.getElementById('dna-card');
     if (dnaCard && AUTHED && SESSION_ID) dnaCard.classList.add('authed');
@@ -3037,19 +3052,6 @@ function wireMintButtons() {
       });
     }
   } catch (e) { console.warn('profile init failed', e); }
-  try { wireMintButtons(); } catch {}
-  try {
-    document.querySelectorAll('input[name="agent-name"]').forEach(el => {
-      el.addEventListener('input', () => { el.dataset.userTouched = '1'; });
-    });
-    // Clear the seed value in the signal flow so the placeholder logic kicks in for fresh visitors
-    const signalPanel = document.querySelector('.flow-panel[data-flow="signal"]');
-    const signalName = signalPanel ? signalPanel.querySelector('input[name="agent-name"]') : null;
-    if (signalName && !window.__grokOwnerHandle && signalName.value === 'JanSol0sAI') {
-      signalName.value = '';
-      signalName.placeholder = 'YourHandleAI';
-    }
-  } catch {}
 })();
 // === end Worker wiring ===
 
