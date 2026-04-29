@@ -344,12 +344,181 @@ nav {
 .btn-customize:hover { color: var(--text-dim); }
 .btn-customize:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
 
-/* When the quick-mint flow is the entry, hide the detailed form scaffolding
-   until the user explicitly clicks "Customize before minting →". */
-main.quick-mint-collapsed .path-tabs,
-main.quick-mint-collapsed .user-flow,
-main.quick-mint-collapsed .workspace,
-main.quick-mint-collapsed .wall-section { display: none !important; }
+/* === Express-lane (one-button) frame === */
+.quick-mint-section {
+  max-width: 720px;
+  margin: 22px auto 0;
+  padding: 0 8px;
+}
+.quick-mint-frame {
+  position: relative;
+  padding: 26px 28px 22px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at top left, rgba(74,222,128,0.12), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(34,211,238,0.10), transparent 60%),
+    linear-gradient(180deg, rgba(15,20,28,0.85), rgba(10,14,20,0.92));
+  border: 1px solid rgba(74,222,128,0.32);
+  box-shadow: 0 18px 48px -22px rgba(74,222,128,0.45),
+              0 0 0 1px rgba(255,255,255,0.04) inset;
+  overflow: hidden;
+}
+.quick-mint-frame::before {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: 22px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(74,222,128,0.6) 0%, rgba(34,211,238,0.5) 50%, rgba(167,139,250,0.4) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.quick-mint-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+.qms-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(74,222,128,0.7);
+  animation: qmsDotPulse 1.8s ease-in-out infinite;
+}
+@keyframes qmsDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.quick-mint-title {
+  font-size: clamp(22px, 3.6vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+.qms-accent {
+  background: linear-gradient(135deg, var(--green-bright) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.quick-mint-pitch {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0 0 16px;
+  max-width: 560px;
+}
+.quick-mint-bullets {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex; flex-wrap: wrap; gap: 8px 16px;
+}
+.quick-mint-bullets li {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 500;
+  color: var(--text-dim);
+}
+.qmb-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 999px;
+  background: rgba(74,222,128,0.10);
+  border: 1px solid rgba(74,222,128,0.32);
+  color: var(--green);
+  font-size: 11px;
+}
+.quick-mint-section .btn-quick-mint {
+  width: 100%;
+  max-width: none;
+  margin-top: 4px;
+}
+.quick-mint-foot {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+}
+.qms-arrow {
+  display: inline-block;
+  color: var(--green);
+  text-shadow: 0 0 8px rgba(74,222,128,0.5);
+  margin: 0 4px;
+  animation: qmsBob 1.6s ease-in-out infinite;
+}
+@keyframes qmsBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qms-dot, .qms-arrow { animation: none; }
+}
+@media (max-width: 520px) {
+  .quick-mint-frame { padding: 22px 20px 18px; }
+  .quick-mint-bullets { gap: 6px 12px; }
+  .quick-mint-bullets li { font-size: 12px; }
+}
+
+/* === Path-tab #2 (template) — small "agent heads" treatment === */
+.path-tab .pt-head {
+  display: inline-block;
+  font-size: 22px;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(167,139,250,0.55);
+}
+.path-tab .pt-head-1 { color: var(--purple-bright); }
+.path-tab .pt-head-2 {
+  color: var(--cyan);
+  margin-left: -6px;
+  text-shadow: 0 0 10px rgba(34,211,238,0.55);
+}
+
+/* === Bottom pricing pill (moved from hero) + glowing info arrow === */
+.bottom-trust {
+  max-width: 760px;
+  margin: 28px auto 8px;
+  padding: 0 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.bottom-trust .hero-pricing-pill {
+  /* reuses .hero-pricing-pill base styles; we just allow it to live here */
+  margin: 0;
+}
+.bt-arrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--green);
+  font-size: 12px; font-weight: 600;
+  font-family: var(--mono);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(74,222,128,0.55);
+}
+.bt-arrow .bt-glow {
+  display: inline-block;
+  font-size: 16px;
+  animation: btGlowBob 1.6s ease-in-out infinite;
+}
+.bt-arrow a {
+  color: var(--green);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(74,222,128,0.4);
+}
+.bt-arrow a:hover { color: var(--green-bright); border-bottom-color: var(--green-bright); }
+@keyframes btGlowBob {
+  0%, 100% { transform: translateY(0); text-shadow: 0 0 10px rgba(74,222,128,0.6); }
+  50% { transform: translateY(2px); text-shadow: 0 0 18px rgba(74,222,128,0.9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bt-arrow .bt-glow { animation: none; }
+}
 
 @media (max-width: 480px) {
   .btn-quick-mint { padding: 16px 22px; gap: 14px; }
@@ -2230,7 +2399,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 <div class="bg-grid"></div>
 <div class="particles" id="particles"></div>
 
-<main class="quick-mint-collapsed" id="builder-main">
+<main id="builder-main">
   <nav>
     <div class="brand">
       <div class="brand-logo">●</div>
@@ -2258,15 +2427,26 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <span style="color: var(--text-mute);">·</span>
       <span class="stat" style="color: var(--purple-bright);">be the first</span>
     </div>
-    <div class="hero-pricing-pill" role="note" aria-label="Pricing and trust">
-      <span class="hpp-icon" aria-hidden="true">$</span>
-      <span class="hpp-text">Free to mint · You set the daily cap · Billed via your xAI credits</span>
-      <a class="hpp-link" href="pricing.html">Pricing &amp; trust →</a>
-    </div>
+  </section>
 
-    <!-- One-Button Mint: primary entry. Detailed form is hidden until the
-         user clicks "Customize before minting →". -->
-    <div class="quick-mint">
+  <!-- ONE-BUTTON MINT: the express lane. Sits where the path-tabs used to.
+       Detailed customizable / template paths are below. -->
+  <section class="quick-mint-section" aria-labelledby="quick-mint-title">
+    <div class="quick-mint-frame">
+      <div class="quick-mint-eyebrow">
+        <span class="qms-dot"></span> Express lane · One-button mint
+      </div>
+      <h2 id="quick-mint-title" class="quick-mint-title">
+        Skip the form. <span class="qms-accent">Mint in 30 seconds.</span>
+      </h2>
+      <p class="quick-mint-pitch">
+        We read your X voice, pick your mascot, mint to your own GitHub repo. One click, one X sign-in, done — your AI agent is born from your signal with a unique Genesis ID.
+      </p>
+      <ul class="quick-mint-bullets" aria-label="What the express lane does">
+        <li><span class="qmb-icon">⚡</span> Auto-built from your X voice signal</li>
+        <li><span class="qmb-icon">★</span> Unique mascot picked for you</li>
+        <li><span class="qmb-icon">⌥</span> Mints to your own GitHub repo</li>
+      </ul>
       <button class="btn-quick-mint" id="btn-quick-mint" type="button" aria-label="Mint my AI agent with safe defaults from my X profile">
         <span class="qm-icon" aria-hidden="true">⚡</span>
         <span class="qm-text">
@@ -2274,28 +2454,31 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <span class="qm-sub">Uses safe defaults from your X profile · ~30 seconds</span>
         </span>
       </button>
-      <button class="btn-customize" id="btn-customize" type="button">
-        Customize before minting →
-      </button>
+      <div class="quick-mint-foot">
+        Want to fine-tune every detail first? <span class="qms-arrow">↓</span> Use the customizable path below.
+      </div>
     </div>
   </section>
 
-  <!-- PATH SELECTOR -->
+  <!-- PATH SELECTOR (now the customizable / template alternatives, below the express lane) -->
   <div class="path-tabs path-tabs-big">
     <button class="path-tab purple active" data-flow="signal" aria-current="step">
-      <div class="path-tab-icon">⚡</div>
+      <div class="path-tab-icon">⚙</div>
       <div class="path-tab-content">
-        <div class="path-tab-title">Mint from your X signal</div>
-        <div class="path-tab-sub">One-of-a-kind · ~90 seconds</div>
-        <div class="path-tab-desc">Sign in with X. We analyze your voice and style, you get an agent that sounds exactly like you with a unique Genesis ID.</div>
+        <div class="path-tab-title">Customizable mint agent</div>
+        <div class="path-tab-sub">Edit every detail · ~90 seconds</div>
+        <div class="path-tab-desc">Sign in with X. Tweak the voice DNA, name, mascot style, daily cap — fine-tune everything before minting your unique Genesis ID.</div>
       </div>
     </button>
     <button class="path-tab" data-flow="template">
-      <div class="path-tab-icon">▦</div>
+      <div class="path-tab-icon" aria-hidden="true">
+        <span class="pt-head pt-head-1">◐</span>
+        <span class="pt-head pt-head-2">◑</span>
+      </div>
       <div class="path-tab-content">
         <div class="path-tab-title">Pick a template</div>
         <div class="path-tab-sub">Pre-tuned · 60 seconds</div>
-        <div class="path-tab-desc">Choose from 8 ready-made agents — brand assistant, market signals, dev help, daily brief, and more.</div>
+        <div class="path-tab-desc">Choose from 8 ready-made agents — brand assistant, market signals, dev help, daily brief, and more. Each one ships with its own personality.</div>
       </div>
     </button>
   </div>
@@ -2994,6 +3177,20 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <div class="wall-empty-mark">·</div>
       <div class="wall-empty-text">The wall is quiet.</div>
       <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
+    </div>
+  </section>
+
+  <!-- Bottom trust pill: free-mint reassurance + arrow to the full info page. -->
+  <section class="bottom-trust" aria-label="Pricing and trust">
+    <div class="hero-pricing-pill">
+      <span class="hpp-icon" aria-hidden="true">$</span>
+      <span class="hpp-text">Free mint and low usage. For more info check info</span>
+      <a class="hpp-link" href="pricing.html">→</a>
+    </div>
+    <div class="bt-arrow">
+      <span class="bt-glow" aria-hidden="true">↓</span>
+      <a href="pricing.html">info</a>
+      <span class="bt-glow" aria-hidden="true">↓</span>
     </div>
   </section>
 
