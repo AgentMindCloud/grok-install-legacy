@@ -12,16 +12,16 @@ This document defines the **non-negotiable safety floor** every agent built with
 5. **No deepfakes** — mascot generation is locked to 8 stylized illustration prompts. No real-person likenesses.
 
 ### Identity
-6. **Clear AI labeling** — agent's bio must contain one of: `AI`, `Bot`, `Powered by Grok`.
-7. **Pretend-human disallowed** — when asked "are you a bot?" the agent must answer truthfully.
+1. **Clear AI labeling** — agent's bio must contain one of: `AI`, `Bot`, `Powered by Grok`.
+2. **Pretend-human disallowed** — when asked "are you a bot?" the agent must answer truthfully.
 
 ### Limits
-8. **Rate-limited** — `qps`, `daily_replies`, and `daily_usd_cap` are declared in YAML and enforced by the runtime.
-9. **No bypass** — agents cannot dynamically alter their own limits at runtime.
+1. **Rate-limited** — `qps`, `daily_replies`, and `daily_usd_cap` are declared in YAML and enforced by the runtime.
+2. **No bypass** — agents cannot dynamically alter their own limits at runtime.
 
 ### Security
-10. **No hardcoded keys** — scanner rejects any YAML with literal API keys or secrets.
-11. **Minimum scopes** — agents request only the tools they actively use.
+1. **No hardcoded keys** — scanner rejects any YAML with literal API keys or secrets.
+2. **Minimum scopes** — agents request only the tools they actively use.
 
 ## Owner consent for updates
 
