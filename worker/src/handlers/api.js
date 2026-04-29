@@ -7,6 +7,7 @@ import { profileAnalyzerPrompt, sampleReplyPrompt, safeProfileDefaults, safeSamp
 import { buildMascotPrompt, isValidStyle, buildXIntentForMascot } from '../lib/mascots.js';
 import { buildMintRepoFiles } from '../lib/repo-template.js';
 import { createUserRepo, commitFilesToRepo, starRepo } from '../lib/github.js';
+import { validateYamlAgainstV214 } from '../lib/yaml-validator.js';
 
 const MAX_MASCOT_REROLLS = 5;
 const MAX_SAMPLE_REROLLS = 3;
@@ -340,6 +341,11 @@ export async function handleMint(request, env) {
   const yamlFile = files.find(f => f.path === 'grok-install.yaml');
   if (!noLeakedSecrets(yamlFile.content)) {
     console.warn('mint: leaked-secret pattern detected in YAML for', genesisId, '— minting anyway per scanner-off policy');
+  }
+  const v214 = validateYamlAgainstV214(yamlFile.content);
+  if (!v214.ok) {
+    console.warn('mint: emitted YAML failed v2.14 validation for', genesisId, '—', v214.errors);
+    return error(`Generated YAML failed v2.14 validation: ${v214.errors}`, 422);
   }
 
   try {
