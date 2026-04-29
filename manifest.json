@@ -1,12 +1,31 @@
 {
   "schema_version": 1,
-  "latest": "1.5.0",
-  "minimum_supported": "1.0.0",
+  "latest": "2.14.0",
+  "minimum_supported": "2.13.0",
   "channels": {
-    "stable": "1.5.0",
+    "stable": "2.14.0",
     "preview": null
   },
   "changelog": [
+    {
+      "version": "2.14.0",
+      "date": "2026-04-29",
+      "type": "major",
+      "changes": [
+        "Migrated minted YAML to grok-install spec v2.14 (validates against schemas/v2.14/schema.json)",
+        "Tools now declared as JSON-Schema objects (reply_to_mention + post_thread)",
+        "Owner X account is the agent X account — no separate handle needed",
+        "Per-tool rate_limits + flat cost_limits blocks",
+        "x_native_runtime block: type reply-bot, grok_orchestrator: true",
+        "safety block has the v2.14 four-key shape (pre_install_scan, verified_by_grok, scan_summary_visible, minimum_keys_only)",
+        "Server-side safety-scanner gate disabled at mint; only leaked-secret check remains as a non-blocking warning",
+        "License back to Apache 2.0 across project + minted agents"
+      ],
+      "migration": "regenerate",
+      "breaking": [
+        "v1.5 mints (brain:, string-list tools, personality, commands, x_account, wall, provenance) no longer install via @grok install — re-mint required"
+      ]
+    },
     {
       "version": "1.5.0",
       "date": "2026-04-28",
