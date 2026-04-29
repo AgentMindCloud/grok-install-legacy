@@ -482,42 +482,139 @@ nav {
   text-shadow: 0 0 10px rgba(34,211,238,0.55);
 }
 
-/* === Bottom pricing pill (moved from hero) + glowing info arrow === */
+/* === Bottom pricing pill (moved from hero) + glowing inline info arrow === */
 .bottom-trust {
   max-width: 760px;
-  margin: 28px auto 8px;
+  margin: 22px auto 8px;
   padding: 0 16px;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  display: flex; flex-direction: column; align-items: center;
 }
-.bottom-trust .hero-pricing-pill {
-  /* reuses .hero-pricing-pill base styles; we just allow it to live here */
-  margin: 0;
+.bottom-trust .hero-pricing-pill { margin: 0; }
+.bt-info-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
 }
-.bt-arrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  color: var(--green);
-  font-size: 12px; font-weight: 600;
-  font-family: var(--mono);
-  letter-spacing: 0.14em; text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(74,222,128,0.55);
-}
-.bt-arrow .bt-glow {
+.bt-glow-inline {
   display: inline-block;
-  font-size: 16px;
-  animation: btGlowBob 1.6s ease-in-out infinite;
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(74,222,128,0.6);
+  animation: btInlineGlow 1.6s ease-in-out infinite;
 }
-.bt-arrow a {
+@keyframes btInlineGlow {
+  0%, 100% { transform: translateX(0); text-shadow: 0 0 10px rgba(74,222,128,0.6); }
+  50% { transform: translateX(2px); text-shadow: 0 0 18px rgba(74,222,128,0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bt-glow-inline { animation: none; }
+}
+
+/* === Trust manifesto: SECURITY CHECKED + values, sits before the bottom pill === */
+.trust-manifesto {
+  max-width: 720px;
+  margin: 40px auto 0;
+  padding: 32px 28px 26px;
+  text-align: center;
+  border: 1px solid rgba(74,222,128,0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.10), transparent 60%),
+    linear-gradient(180deg, rgba(15,20,28,0.6), rgba(10,14,20,0.85));
+  position: relative;
+  overflow: hidden;
+}
+.trust-manifesto::before {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(74,222,128,0.45), rgba(34,211,238,0.30) 60%, transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+.tm-shield {
+  display: inline-flex; justify-content: center;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 18px rgba(74,222,128,0.55));
+  animation: tmShieldPulse 3s ease-in-out infinite;
+}
+@keyframes tmShieldPulse {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(74,222,128,0.40)); }
+  50%      { filter: drop-shadow(0 0 26px rgba(74,222,128,0.80)); }
+}
+.tm-title {
+  font-size: clamp(22px, 3.6vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-family: var(--mono);
+  color: var(--text);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+.tm-tag {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin: 0 0 22px;
+  line-height: 1.5;
+}
+.tm-tenets {
+  list-style: none;
+  margin: 0 auto 18px;
+  padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  text-align: left;
+  max-width: 540px;
+}
+.tm-tenets li {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.tm-tenets li:hover {
+  border-color: rgba(74,222,128,0.25);
+  background: rgba(74,222,128,0.04);
+}
+.tm-tenet-label {
+  font-size: 11px; font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.20em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.tm-tenet-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.tm-tenet-link {
+  font-size: 13px;
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(34,211,238,0.4);
+  font-family: var(--mono);
+  word-break: break-all;
+  align-self: flex-start;
+}
+.tm-tenet-link:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
+.tm-by {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  margin-top: 6px;
+}
+.tm-by a {
   color: var(--green);
   text-decoration: none;
   border-bottom: 1px solid rgba(74,222,128,0.4);
 }
-.bt-arrow a:hover { color: var(--green-bright); border-bottom-color: var(--green-bright); }
-@keyframes btGlowBob {
-  0%, 100% { transform: translateY(0); text-shadow: 0 0 10px rgba(74,222,128,0.6); }
-  50% { transform: translateY(2px); text-shadow: 0 0 18px rgba(74,222,128,0.9); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bt-arrow .bt-glow { animation: none; }
+.tm-by a:hover { color: var(--green-bright); border-bottom-color: var(--green-bright); }
+@media (prefers-reduced-motion: reduce) { .tm-shield { animation: none; } }
+@media (max-width: 520px) {
+  .trust-manifesto { padding: 26px 18px 22px; margin: 32px 12px 0; }
 }
 
 /* === Right-column repo ads === */
@@ -3294,17 +3391,53 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
     </div>
   </section>
 
+  <!-- Lowest block: security manifesto / values + by-line. Sits between the
+       wall and the bottom trust pill. -->
+  <section class="trust-manifesto" aria-labelledby="tm-title">
+    <div class="tm-shield" aria-hidden="true">
+      <svg viewBox="0 0 80 96" width="84" height="100" fill="none">
+        <defs>
+          <linearGradient id="tm-shield-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#22ee88"/>
+            <stop offset="100%" stop-color="#22d3ee"/>
+          </linearGradient>
+        </defs>
+        <path d="M40 4 L72 18 V42 C72 64 56 84 40 92 C24 84 8 64 8 42 V18 Z" stroke="url(#tm-shield-grad)" stroke-width="2" fill="rgba(74,222,128,0.07)"/>
+        <path d="M40 12 L66 22 V42 C66 60 53 76 40 84 C27 76 14 60 14 42 V22 Z" stroke="rgba(74,222,128,0.18)" stroke-width="1" fill="none"/>
+        <path d="M28 48 L36 56 L52 38" stroke="url(#tm-shield-grad)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <h2 id="tm-title" class="tm-title">SECURITY CHECKED</h2>
+    <p class="tm-tag">Pre-approved by Grok safety scan · Schema-validated against v2.14 on every mint.</p>
+    <ul class="tm-tenets">
+      <li>
+        <span class="tm-tenet-label">100% Ownership</span>
+        <span class="tm-tenet-desc">Your agent. Your repo. Your X account. Always.</span>
+      </li>
+      <li>
+        <span class="tm-tenet-label">No corporate ads</span>
+        <span class="tm-tenet-desc">Your agent never carries sponsored content. The right column links my own open-source repos — that's the only ad on this page.</span>
+      </li>
+      <li>
+        <span class="tm-tenet-label">Free mint</span>
+        <span class="tm-tenet-desc">No card. No trial. Mint your agent and use it.</span>
+      </li>
+      <li>
+        <span class="tm-tenet-label">More free features</span>
+        <a class="tm-tenet-link" href="https://github.com/AgentMindCloud/grok-install" target="_blank" rel="noopener">github.com/AgentMindCloud/grok-install →</a>
+      </li>
+    </ul>
+    <div class="tm-by">
+      By: X <a href="https://x.com/JanSol0s" target="_blank" rel="noopener">@JanSol0s</a>
+    </div>
+  </section>
+
   <!-- Bottom trust pill: free-mint reassurance + arrow to the full info page. -->
   <section class="bottom-trust" aria-label="Pricing and trust">
     <div class="hero-pricing-pill">
       <span class="hpp-icon" aria-hidden="true">$</span>
-      <span class="hpp-text">Free mint and low usage. For more info check info</span>
-      <a class="hpp-link" href="pricing.html">→</a>
-    </div>
-    <div class="bt-arrow">
-      <span class="bt-glow" aria-hidden="true">↓</span>
-      <a href="pricing.html">info</a>
-      <span class="bt-glow" aria-hidden="true">↓</span>
+      <span class="hpp-text">Free to mint · Free low daily usage · For heavier usage</span>
+      <a class="hpp-link bt-info-link" href="pricing.html"><span class="bt-glow-inline" aria-hidden="true">→</span> info</a>
     </div>
   </section>
 
