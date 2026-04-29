@@ -292,13 +292,15 @@ export async function handleMint(request, env) {
     await saveSession(env, sessionId, session);
   } catch (e) { console.warn('session lastMintAt update failed', e); }
 
-  const tweetText = `Just minted my AI agent @${agentHandle} with grok-install. Genesis ${genesisId}.\n\n@grok install ${repo.html_url}`;
+  const tweetText = `Just minted my AI agent @${agentHandle} with grok-install. Genesis ${genesisId}.\n\n${repo.html_url}`;
+  const installComment = '@grok install this';
   const dashboardUrl = `${env.PUBLIC_BASE_URL}/dashboard.html?genesis=${genesisId}`;
 
   return json({
     genesisId,
     repoUrl: repo.html_url,
     tweetText,
+    installComment,
     dashboardUrl,
     mintedAt,
   });

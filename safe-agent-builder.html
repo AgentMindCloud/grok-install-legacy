@@ -2510,11 +2510,18 @@ function getActiveFlow() {
   return active?.dataset?.flow || 'signal';
 }
 
-function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
-  const intentUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweetText || '');
+function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashboardUrl }) {
   const safeRepo = (repoUrl && /^https:\/\/github\.com\//.test(repoUrl)) ? repoUrl : '';
   const safeDash = (dashboardUrl && /^https:\/\//.test(dashboardUrl)) ? dashboardUrl : '';
+  const tweet = tweetText || '';
+  const comment = installComment || '@grok install this';
+  const intentUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweet);
   const previousFocus = document.activeElement;
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   const overlay = document.createElement('div');
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
@@ -2525,24 +2532,35 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
     '<div style="background:#0f141c;border:1px solid rgba(74,222,128,0.3);border-radius:18px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;">' +
     '<h2 id="mint-overlay-title" style="color:#4ade80;font-size:24px;margin:0 0 8px;">Minted!</h2>' +
     '<p style="color:#e8ecf2;font-size:13px;margin:0 0 14px;padding:10px 12px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:10px;"><strong style="color:#4ade80;">100% yours.</strong> No one — not even us — can change this agent without your explicit consent.</p>' +
-    '<p style="color:#9ca3af;margin:0 0 16px;">Your agent is live. Genesis ID:</p>' +
-    '<div style="font-family:JetBrains Mono,monospace;font-size:18px;color:#c4b5fd;background:rgba(167,139,250,0.12);padding:10px 14px;border-radius:10px;display:inline-block;margin-bottom:18px;">' + escapeHtml(genesisId || 'GA-XXXXXXXX') + '</div>' +
-    '<p style="color:#9ca3af;font-size:13px;margin:0 0 8px;">Repo:</p>' +
-    '<a href="' + safeRepo + '" target="_blank" rel="noopener" style="color:#22d3ee;font-family:JetBrains Mono,monospace;font-size:13px;display:block;margin-bottom:18px;word-break:break-all;">' + escapeHtml(safeRepo) + '</a>' +
-    '<p style="color:#9ca3af;font-size:13px;margin:0 0 6px;">Pre-filled tweet:</p>' +
-    '<pre id="mint-tweet-text" style="background:#07090d;border:1px solid rgba(74,222,128,0.15);padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;color:#e8ecf2;margin:0 0 18px;">' + escapeHtml(tweetText || '') + '</pre>' +
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-    '<button id="mint-copy" type="button" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(74,222,128,0.3);border-radius:10px;color:#e8ecf2;font-weight:500;cursor:pointer;">Copy tweet</button>' +
-    '<a id="mint-intent" href="' + intentUrl + '" target="_blank" rel="noopener" style="flex:1;min-width:120px;padding:12px 18px;background:linear-gradient(135deg,#4ade80,#22ee88);border-radius:10px;color:#07090d;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;">Open in X</a>' +
-    (safeDash ? '<a id="mint-dash" href="' + safeDash + '" style="flex:1;min-width:120px;padding:12px 18px;background:#151b26;border:1px solid rgba(167,139,250,0.3);border-radius:10px;color:#c4b5fd;font-weight:500;text-decoration:none;text-align:center;">Dashboard</a>' : '') +
+    '<p style="color:#9ca3af;margin:0 0 8px;">Genesis ID:</p>' +
+    '<div style="font-family:JetBrains Mono,monospace;font-size:18px;color:#c4b5fd;background:rgba(167,139,250,0.12);padding:10px 14px;border-radius:10px;display:inline-block;margin-bottom:14px;">' + escapeHtml(genesisId || 'GA-XXXXXXXX') + '</div>' +
+    '<p style="color:#9ca3af;font-size:13px;margin:0 0 6px;">Repo:</p>' +
+    '<a href="' + safeRepo + '" target="_blank" rel="noopener" style="color:#22d3ee;font-family:JetBrains Mono,monospace;font-size:13px;display:block;margin-bottom:22px;word-break:break-all;">' + escapeHtml(safeRepo) + '</a>' +
+
+    // Step 1
+    '<div style="display:flex;align-items:center;gap:10px;margin:0 0 8px;">' +
+    '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#4ade80;color:#07090d;font-weight:700;font-size:12px;font-family:JetBrains Mono,monospace;">1</span>' +
+    '<strong style="color:#e8ecf2;font-size:14px;">Post this tweet to announce your agent</strong>' +
     '</div>' +
-    '<button id="mint-close" type="button" style="margin-top:14px;width:100%;padding:8px;background:transparent;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Close</button>' +
+    '<pre id="mint-tweet-text" style="background:#07090d;border:1px solid rgba(74,222,128,0.15);padding:12px;border-radius:10px;font-size:12px;white-space:pre-wrap;color:#e8ecf2;margin:0 0 10px;">' + escapeHtml(tweet) + '</pre>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;">' +
+    '<button id="mint-copy-tweet" type="button" style="flex:1;min-width:120px;padding:11px 16px;background:#151b26;border:1px solid rgba(74,222,128,0.3);border-radius:10px;color:#e8ecf2;font-weight:500;cursor:pointer;">Copy tweet</button>' +
+    '<a id="mint-intent" href="' + intentUrl + '" target="_blank" rel="noopener" style="flex:1;min-width:120px;padding:11px 16px;background:linear-gradient(135deg,#4ade80,#22ee88);border-radius:10px;color:#07090d;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;">Open in X →</a>' +
+    '</div>' +
+
+    // Step 2
+    '<div style="display:flex;align-items:center;gap:10px;margin:0 0 8px;">' +
+    '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#a78bfa;color:#07090d;font-weight:700;font-size:12px;font-family:JetBrains Mono,monospace;">2</span>' +
+    '<strong style="color:#e8ecf2;font-size:14px;">Reply to your own tweet with this comment</strong>' +
+    '</div>' +
+    '<p style="color:#9ca3af;font-size:12px;margin:0 0 8px;line-height:1.5;">After your tweet posts, click reply on it and paste this exact text. Grok detects it and runs the safety scan automatically.</p>' +
+    '<pre id="mint-install-text" style="background:#07090d;border:1px solid rgba(167,139,250,0.25);padding:12px;border-radius:10px;font-size:14px;font-weight:600;white-space:pre-wrap;color:#c4b5fd;margin:0 0 10px;font-family:JetBrains Mono,monospace;">' + escapeHtml(comment) + '</pre>' +
+    '<button id="mint-copy-comment" type="button" style="width:100%;padding:11px 16px;background:linear-gradient(135deg,rgba(167,139,250,0.18),rgba(34,211,238,0.12));border:1px solid rgba(167,139,250,0.35);border-radius:10px;color:#c4b5fd;font-weight:600;cursor:pointer;margin-bottom:18px;">Copy install comment</button>' +
+
+    (safeDash ? '<a id="mint-dash" href="' + safeDash + '" style="display:block;text-align:center;padding:11px 16px;background:#151b26;border:1px solid rgba(167,139,250,0.25);border-radius:10px;color:#c4b5fd;font-weight:500;text-decoration:none;margin-bottom:6px;">Open dashboard</a>' : '') +
+    '<button id="mint-close" type="button" style="margin-top:8px;width:100%;padding:8px;background:transparent;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Close</button>' +
     '</div>';
   document.body.appendChild(overlay);
-
-  function escapeHtml(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
 
   function close() {
     document.removeEventListener('keydown', onKey);
@@ -2561,21 +2579,20 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
   document.addEventListener('keydown', onKey);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 
-  const copyBtn = document.getElementById('mint-copy');
-  copyBtn.addEventListener('click', async () => {
-    copyBtn.disabled = true;
+  async function copyTo(btn, value, defaultLabel, srcId) {
+    btn.disabled = true;
     let ok = false;
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(tweetText || '');
+        await navigator.clipboard.writeText(value);
         ok = true;
       }
     } catch (err) { console.warn('clipboard error', err); }
-    if (!ok) {
+    if (!ok && srcId) {
       try {
-        const ta = document.getElementById('mint-tweet-text');
+        const src = document.getElementById(srcId);
         const range = document.createRange();
-        range.selectNodeContents(ta);
+        range.selectNodeContents(src);
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
@@ -2583,12 +2600,17 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, dashboardUrl }) {
         sel.removeAllRanges();
       } catch (err2) { console.warn('exec copy error', err2); }
     }
-    copyBtn.textContent = ok ? 'Copied!' : 'Press Ctrl+C to copy';
-    setTimeout(() => { copyBtn.textContent = 'Copy tweet'; copyBtn.disabled = false; }, 2200);
-  });
+    btn.textContent = ok ? 'Copied!' : 'Press Ctrl+C to copy';
+    setTimeout(() => { btn.textContent = defaultLabel; btn.disabled = false; }, 2200);
+  }
+
+  const copyTweetBtn = document.getElementById('mint-copy-tweet');
+  copyTweetBtn.addEventListener('click', () => copyTo(copyTweetBtn, tweet, 'Copy tweet', 'mint-tweet-text'));
+  const copyCommentBtn = document.getElementById('mint-copy-comment');
+  copyCommentBtn.addEventListener('click', () => copyTo(copyCommentBtn, comment, 'Copy install comment', 'mint-install-text'));
   document.getElementById('mint-close').addEventListener('click', close);
-  // Initial focus on the most useful action
-  const initial = document.getElementById('mint-intent') || copyBtn;
+
+  const initial = document.getElementById('mint-intent') || copyTweetBtn;
   if (initial) initial.focus();
 }
 
