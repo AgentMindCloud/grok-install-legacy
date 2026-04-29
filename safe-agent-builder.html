@@ -294,6 +294,158 @@ nav {
   }
 }
 
+/* === One-Button Mint (item #1) === */
+.quick-mint {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin: 28px 0 8px;
+}
+.btn-quick-mint {
+  display: inline-flex; align-items: center; gap: 18px;
+  padding: 18px 32px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--green) 0%, #22ee88 50%, var(--cyan) 100%);
+  border: 1px solid rgba(74, 222, 128, 0.55);
+  color: #07090d;
+  cursor: pointer;
+  box-shadow: 0 14px 32px -10px rgba(74, 222, 128, 0.45), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  transition: transform 0.15s ease, box-shadow 0.18s ease;
+  max-width: 540px; width: 100%;
+}
+.btn-quick-mint:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px -10px rgba(74, 222, 128, 0.6), 0 0 0 1px rgba(255,255,255,0.1) inset;
+}
+.btn-quick-mint:active { transform: translateY(0); }
+.btn-quick-mint:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-quick-mint .qm-icon {
+  font-size: 28px; line-height: 1;
+  flex: 0 0 auto;
+}
+.btn-quick-mint .qm-text {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  flex: 1 1 auto; text-align: left;
+}
+.btn-quick-mint .qm-title {
+  font-size: 19px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;
+}
+.btn-quick-mint .qm-sub {
+  font-size: 12px; font-weight: 500; opacity: 0.75; line-height: 1.3;
+}
+.btn-customize {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+.btn-customize:hover { color: var(--text-dim); }
+.btn-customize:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
+
+/* When the quick-mint flow is the entry, hide the detailed form scaffolding
+   until the user explicitly clicks "Customize before minting →". */
+main.quick-mint-collapsed .path-tabs,
+main.quick-mint-collapsed .user-flow,
+main.quick-mint-collapsed .workspace,
+main.quick-mint-collapsed .wall-section { display: none !important; }
+
+@media (max-width: 480px) {
+  .btn-quick-mint { padding: 16px 22px; gap: 14px; }
+  .btn-quick-mint .qm-icon { font-size: 24px; }
+  .btn-quick-mint .qm-title { font-size: 17px; }
+  .btn-quick-mint .qm-sub { font-size: 11px; }
+}
+
+/* === Checking overlay (the visible "trust theatre" during quick mint) === */
+#checking-overlay {
+  position: fixed; inset: 0; z-index: 9500;
+  display: none;
+  background: rgba(7, 9, 13, 0.78);
+  backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+#checking-overlay[data-open="1"] { display: flex; }
+.cm-card {
+  width: 100%; max-width: 480px;
+  background: linear-gradient(180deg, rgba(15, 20, 28, 0.98), rgba(10, 14, 20, 0.99));
+  border: 1px solid var(--border-purple);
+  border-radius: 18px;
+  padding: 28px 30px 26px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+}
+.cm-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-family: var(--mono);
+  margin-bottom: 8px;
+}
+.cm-title {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 22px;
+}
+.cm-steps { display: flex; flex-direction: column; gap: 12px; }
+.cm-step {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; line-height: 1.4;
+  color: var(--text-faint);
+  opacity: 0.6;
+  transition: opacity 0.25s ease, color 0.25s ease;
+}
+.cm-step[data-state="active"], .cm-step[data-state="done"] { opacity: 1; color: var(--text); }
+.cm-step[data-state="error"] { opacity: 1; color: #fca5a5; }
+.cm-icon {
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  flex: 0 0 auto;
+  font-size: 11px; font-weight: 700;
+}
+.cm-step[data-state="active"] .cm-icon {
+  border-color: var(--green);
+  background: rgba(74,222,128,0.10);
+  color: var(--green);
+}
+.cm-step[data-state="active"] .cm-icon::before {
+  content: ""; width: 10px; height: 10px;
+  border: 2px solid var(--green);
+  border-top-color: transparent;
+  border-radius: 999px;
+  animation: cmSpin 0.7s linear infinite;
+}
+.cm-step[data-state="done"] .cm-icon {
+  background: rgba(74,222,128,0.18);
+  border-color: var(--green);
+  color: var(--green);
+}
+.cm-step[data-state="done"] .cm-icon::before { content: "\2713"; }
+.cm-step[data-state="error"] .cm-icon {
+  background: rgba(252,165,165,0.14);
+  border-color: #fca5a5;
+  color: #fca5a5;
+}
+.cm-step[data-state="error"] .cm-icon::before { content: "\00D7"; font-size: 14px; }
+.cm-foot {
+  margin-top: 22px; padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px; color: var(--text-faint);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+@keyframes cmSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cm-step[data-state="active"] .cm-icon::before { animation: none; }
+}
+
 /* === Live Agent Tester (#live-tester-panel) — items 15+16 === */
 .dna-tester-cta {
   display: none;
@@ -2078,7 +2230,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 <div class="bg-grid"></div>
 <div class="particles" id="particles"></div>
 
-<main>
+<main class="quick-mint-collapsed" id="builder-main">
   <nav>
     <div class="brand">
       <div class="brand-logo">●</div>
@@ -2110,6 +2262,21 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <span class="hpp-icon" aria-hidden="true">$</span>
       <span class="hpp-text">Free to mint · You set the daily cap · Billed via your xAI credits</span>
       <a class="hpp-link" href="pricing.html">Pricing &amp; trust →</a>
+    </div>
+
+    <!-- One-Button Mint: primary entry. Detailed form is hidden until the
+         user clicks "Customize before minting →". -->
+    <div class="quick-mint">
+      <button class="btn-quick-mint" id="btn-quick-mint" type="button" aria-label="Mint my AI agent with safe defaults from my X profile">
+        <span class="qm-icon" aria-hidden="true">⚡</span>
+        <span class="qm-text">
+          <span class="qm-title">Mint my AI agent</span>
+          <span class="qm-sub">Uses safe defaults from your X profile · ~30 seconds</span>
+        </span>
+      </button>
+      <button class="btn-customize" id="btn-customize" type="button">
+        Customize before minting →
+      </button>
     </div>
   </section>
 
@@ -3362,12 +3529,181 @@ function wireMintButtons() {
   });
 }
 
+// === One-Button Mint flow ===
+const QUICK_MINT_FLAG = 'quickMintPending';
+
+function wireQuickMint() {
+  const btn = document.getElementById('btn-quick-mint');
+  const cust = document.getElementById('btn-customize');
+  const main = document.getElementById('builder-main');
+  if (btn) btn.addEventListener('click', () => runQuickMintFlow());
+  if (cust && main) {
+    cust.addEventListener('click', () => {
+      main.classList.remove('quick-mint-collapsed');
+      const tabs = document.querySelector('.path-tabs');
+      if (tabs) {
+        try { tabs.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        catch { window.scrollTo(0, tabs.offsetTop - 20); }
+      }
+    });
+  }
+}
+
+function setQmStep(step, state) {
+  const el = document.querySelector('#cm-steps .cm-step[data-step="' + step + '"]');
+  if (el) el.dataset.state = state;
+}
+
+function openCheckingOverlay() {
+  const ov = document.getElementById('checking-overlay');
+  if (ov) ov.dataset.open = '1';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCheckingOverlay() {
+  const ov = document.getElementById('checking-overlay');
+  if (ov) ov.dataset.open = '0';
+  document.body.style.overflow = '';
+  document.querySelectorAll('#cm-steps .cm-step').forEach(s => { s.dataset.state = ''; });
+  const btn = document.getElementById('btn-quick-mint');
+  if (btn) btn.disabled = false;
+}
+
+function qmWait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runQuickMintFlow() {
+  // First-time: not signed in. Set the resume flag and bounce to X OAuth.
+  if (!(AUTHED && SESSION_ID)) {
+    try { localStorage.setItem(QUICK_MINT_FLAG, '1'); } catch {}
+    window.location.href = WORKER_URL + '/auth/x/start';
+    return;
+  }
+
+  const btn = document.getElementById('btn-quick-mint');
+  if (btn) btn.disabled = true;
+  openCheckingOverlay();
+
+  // Step 1: X — already authenticated; just show the visible check.
+  setQmStep('x', 'active');
+  await qmWait(420);
+  setQmStep('x', 'done');
+  await qmWait(120);
+
+  // Step 2: read X signal — call /api/analyze-profile if we don't have it cached.
+  setQmStep('signal', 'active');
+  let profile = window.__grokProfile || null;
+  if (!profile) {
+    try {
+      const r = await safeFetch(WORKER_URL + '/api/analyze-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: SESSION_ID }),
+      });
+      profile = (r.ok && r.body && r.body.profile) || null;
+      if (profile) window.__grokProfile = profile;
+      if (r.ok && r.body && r.body.handle && !window.__grokOwnerHandle) {
+        window.__grokOwnerHandle = r.body.handle;
+      }
+    } catch { /* fall through with empty profile */ }
+  }
+  setQmStep('signal', 'done');
+  await qmWait(140);
+
+  // Step 3: pick a mascot at random from the 8 styles.
+  setQmStep('mascot', 'active');
+  const mascotStyles = ['cyberpunk_neon','retro_pixel','liquid_gold','crystal_glass','spectrum_glitch','linework_ink','specimen_plate','terra_glyph'];
+  const mascotStyle = mascotStyles[Math.floor(Math.random() * mascotStyles.length)];
+  await qmWait(520);
+  setQmStep('mascot', 'done');
+  await qmWait(140);
+
+  // Step 4: visible "GitHub" check — actual server check happens inside /api/mint;
+  // if missing, we'll bounce in the error handler below and resume after auth.
+  setQmStep('github', 'active');
+  await qmWait(420);
+  setQmStep('github', 'done');
+  await qmWait(120);
+
+  // Step 5: visible "validate" check — server runs ajv inside /api/mint.
+  setQmStep('validate', 'active');
+  await qmWait(420);
+  setQmStep('validate', 'done');
+  await qmWait(140);
+
+  // Step 6: actual /api/mint call.
+  setQmStep('mint', 'active');
+  const ownerHandle = (window.__grokOwnerHandle || '').replace(/^@/, '');
+  if (!ownerHandle) {
+    setQmStep('mint', 'error');
+    setTimeout(closeCheckingOverlay, 1500);
+    try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
+    if (typeof showMintError === 'function') {
+      showMintError({ status: 422, body: { error: "Couldn't read your X handle — please sign in again." }, retry: null });
+    }
+    return;
+  }
+  const agentName = ownerHandle + 'AI';
+  const traits = (profile && Array.isArray(profile.voice_traits)) ? profile.voice_traits.slice(0, 3) : [];
+  const description = traits.length
+    ? ('AI agent built from @' + ownerHandle + "'s X signal — voice: " + traits.join(', ') + '.')
+    : ('AI agent built from @' + ownerHandle + "'s X signal.");
+
+  let r;
+  try {
+    r = await safeFetch(WORKER_URL + '/api/mint', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: SESSION_ID,
+        agentName,
+        agentHandle: ownerHandle,
+        mascotStyle,
+        profile,
+        description,
+        source: 'quick-mint',
+        optInWall: true,
+      }),
+    });
+  } catch (e) {
+    setQmStep('mint', 'error');
+    setTimeout(closeCheckingOverlay, 1500);
+    try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
+    return;
+  }
+
+  // Success.
+  if (r.ok && r.body && r.body.genesisId) {
+    setQmStep('mint', 'done');
+    try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
+    await qmWait(420);
+    closeCheckingOverlay();
+    if (typeof showMintOverlay === 'function') showMintOverlay(r.body);
+    return;
+  }
+
+  // GitHub OAuth needed — preserve the resume flag and bounce.
+  if (r.status === 401 && r.body && /github/i.test(r.body.error || '')) {
+    try { localStorage.setItem(QUICK_MINT_FLAG, '1'); } catch {}
+    const ret = encodeURIComponent(window.location.href);
+    window.location.href = WORKER_URL + '/auth/github/start?session=' + encodeURIComponent(SESSION_ID) + '&return=' + ret;
+    return;
+  }
+
+  // Other failures (rate limit, validation error, network) — close overlay,
+  // surface the existing error UI, drop the resume flag.
+  setQmStep('mint', 'error');
+  setTimeout(closeCheckingOverlay, 1600);
+  try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
+  if (typeof showMintError === 'function') showMintError(r);
+}
+
 (async function init() {
   // Synchronous up-front: bind ALL handlers and reflect AUTHED state
   // immediately. The user can interact (sign in, switch tabs, click mint)
   // before any async fetch completes.
   try { wireSignIn(); } catch {}
   try { wireMintButtons(); } catch {}
+  try { wireQuickMint(); } catch {}
   try { wireSidebarToggle(); } catch {}
   try {
     document.querySelectorAll('input[name="agent-name"]').forEach(el => {
@@ -3412,6 +3748,13 @@ function wireMintButtons() {
       });
     }
   } catch (e) { console.warn('profile init failed', e); }
+
+  // Auto-resume quick-mint after X / GitHub OAuth round-trip.
+  try {
+    if (AUTHED && SESSION_ID && localStorage.getItem(QUICK_MINT_FLAG) === '1') {
+      setTimeout(() => { runQuickMintFlow(); }, 250);
+    }
+  } catch { /* private mode / disabled storage */ }
 })();
 // === end Worker wiring ===
 
@@ -3840,6 +4183,22 @@ function wireLiveTester() {
 
 try { wireLiveTester(); } catch {}
 </script>
+
+<div id="checking-overlay" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+  <div class="cm-card">
+    <div class="cm-eyebrow">Minting</div>
+    <h2 class="cm-title" id="cm-title">Building your AI agent</h2>
+    <ol class="cm-steps" id="cm-steps">
+      <li class="cm-step" data-step="x"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Connecting to X</span></li>
+      <li class="cm-step" data-step="signal"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Reading your X signal</span></li>
+      <li class="cm-step" data-step="mascot"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Picking your mascot</span></li>
+      <li class="cm-step" data-step="github"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Granting GitHub permission</span></li>
+      <li class="cm-step" data-step="validate"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Validating against v2.14 spec</span></li>
+      <li class="cm-step" data-step="mint"><span class="cm-icon" aria-hidden="true"></span><span class="cm-label">Minting</span></li>
+    </ol>
+    <div class="cm-foot">No data leaves your device until you authorise each step.</div>
+  </div>
+</div>
 
 </body>
 </html>
