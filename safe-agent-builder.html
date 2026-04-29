@@ -1042,6 +1042,36 @@ input[type="range"]::-moz-range-thumb {
   top: 0; left: 0; right: 0; height: 1px;
   background: linear-gradient(90deg, transparent, var(--purple), transparent);
 }
+.dna-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(13, 13, 18, 0.78) 0%, rgba(13, 13, 18, 0.92) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 14px; padding: 24px;
+  border-radius: 18px; z-index: 5;
+}
+.dna-overlay h3 {
+  font-size: 18px; font-weight: 600; color: var(--text);
+  letter-spacing: -0.01em; margin: 0;
+}
+.dna-overlay p {
+  color: var(--text-dim); font-size: 13px; line-height: 1.55; max-width: 380px; margin: 0;
+}
+.dna-overlay .btn-signin-overlay {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px;
+  background: var(--text); color: var(--bg);
+  border: 0; border-radius: 999px; cursor: pointer;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.dna-overlay .btn-signin-overlay:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,255,255,0.12); }
+.dna-card.authed .dna-overlay { display: none; }
+.dna-card:not(.authed) > *:not(.dna-overlay) {
+  filter: blur(3px) grayscale(0.5);
+  user-select: none; pointer-events: none;
+}
 .dna-header {
   display: flex; justify-content: space-between; align-items: flex-start;
   margin-bottom: 22px;
@@ -1869,7 +1899,13 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
         </div>
 
         <!-- Voice DNA reveal -->
-        <div class="dna-card" data-step="2">
+        <div class="dna-card" data-step="2" id="dna-card">
+          <div class="dna-overlay" role="dialog" aria-label="Sign in to see your Voice DNA">
+            <h3>Sign in with X to see your Voice DNA</h3>
+            <p>We read your bio and recent posts to extract your voice traits, domains, and vibe — then mirror them in your agent. Read-only access. No posts on your behalf, ever.</p>
+            <button type="button" class="btn-signin-overlay btn-signin">Sign in with X (read-only)</button>
+            <p style="font-size: 11px; color: var(--text-faint); font-family: var(--mono);">The card below is a placeholder until you sign in.</p>
+          </div>
           <div class="dna-header">
             <div>
               <div class="dna-handle"><span class="at">@</span><span class="name">JanSol0s</span></div>
@@ -1927,8 +1963,8 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <div class="step-header">
             <div class="step-num purple">M</div>
             <div class="step-info">
-              <h2>Pick a mascot style</h2>
-              <p class="desc">Each style generates a unique mascot from your handle and traits. Re-roll up to 5 times.</p>
+              <h2>Pick a mascot style <span style="display:inline-block;margin-left:8px;padding:2px 8px;font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--cyan);background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:999px;vertical-align:middle;">Preview · v2.15</span></h2>
+              <p class="desc">Used for your specimen plate and wall card today. Visual generation arrives with <code style="color:var(--cyan);font-family:var(--mono);font-size:12px;">visuals.demo_media</code> in v2.15.</p>
             </div>
           </div>
           <div class="mascot-grid">
@@ -2467,24 +2503,41 @@ function wireSignIn() {
 
 function updateDnaCard(profile, handle) {
   if (!profile) return;
+  const card = document.getElementById('dna-card');
+  if (card) card.classList.add('authed');
   const handleEl = document.querySelector('.dna-handle .name');
   if (handleEl && handle) handleEl.textContent = handle;
   const traitGroups = document.querySelectorAll('.dna-traits');
   if (traitGroups[0]) {
     traitGroups[0].innerHTML = (profile.voice_traits || [])
-      .map((t, i) => '<span class="dna-trait" style="animation-delay: ' + (0.05 + i * 0.05) + 's;">' + t + '</span>')
+      .map((t, i) => '<span class="dna-trait" style="animation-delay: ' + (0.05 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
       .join('');
   }
   if (traitGroups[1]) {
     traitGroups[1].innerHTML = (profile.domains || [])
-      .map((t, i) => '<span class="dna-trait cyan" style="animation-delay: ' + (0.3 + i * 0.05) + 's;">' + t + '</span>')
+      .map((t, i) => '<span class="dna-trait cyan" style="animation-delay: ' + (0.3 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
       .join('');
   }
   if (traitGroups[2]) {
     traitGroups[2].innerHTML = (profile.vibe || [])
-      .map((t, i) => '<span class="dna-trait green" style="animation-delay: ' + (0.5 + i * 0.05) + 's;">' + t + '</span>')
+      .map((t, i) => '<span class="dna-trait green" style="animation-delay: ' + (0.5 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
       .join('');
   }
+  // Reset signal-flow agent-name placeholder when a different handle signs in
+  if (handle) {
+    const signalPanel = document.querySelector('.flow-panel[data-flow="signal"]');
+    const nameInput = signalPanel ? signalPanel.querySelector('input[name="agent-name"]') : null;
+    if (nameInput && (!nameInput.dataset.userTouched || nameInput.value === '' || nameInput.value === 'JanSol0sAI')) {
+      nameInput.value = handle + 'AI';
+      nameInput.placeholder = handle + 'AI';
+    }
+  }
+}
+
+function escapeHtmlBuilder(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 async function loadProfileIfAuthed() {
@@ -2686,7 +2739,17 @@ function wireMintButtons() {
       const nameField = panel.querySelector('input[name="agent-name"]');
       const handleField = panel.querySelector('input[name="agent-handle"]');
       const optInChecked = panel.querySelector('input[type="checkbox"]:checked');
-      const agentName = (nameField ? nameField.value : '').trim() || 'MyAgent';
+      const rawName = (nameField ? nameField.value : '').trim();
+      if (!rawName) {
+        showMintError({ status: 422, body: { error: "Pick a display name for your agent first." }, retry: null });
+        if (nameField) { nameField.focus(); nameField.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        return;
+      }
+      if (rawName.length > 64) {
+        showMintError({ status: 422, body: { error: "Display name is too long (max 64 chars)." }, retry: null });
+        return;
+      }
+      const agentName = rawName;
       // Always use the owner's handle — the field is readonly and locked to session.xUsername
       const rawHandle = ownerHandle;
       if (handleField) handleField.value = ownerHandle;
@@ -2756,6 +2819,18 @@ function wireMintButtons() {
     }
   } catch (e) { console.warn('profile init failed', e); }
   try { wireMintButtons(); } catch {}
+  try {
+    document.querySelectorAll('input[name="agent-name"]').forEach(el => {
+      el.addEventListener('input', () => { el.dataset.userTouched = '1'; });
+    });
+    // Clear the seed value in the signal flow so the placeholder logic kicks in for fresh visitors
+    const signalPanel = document.querySelector('.flow-panel[data-flow="signal"]');
+    const signalName = signalPanel ? signalPanel.querySelector('input[name="agent-name"]') : null;
+    if (signalName && !window.__grokOwnerHandle && signalName.value === 'JanSol0sAI') {
+      signalName.value = '';
+      signalName.placeholder = 'YourHandleAI';
+    }
+  } catch {}
 })();
 // === end Worker wiring ===
 

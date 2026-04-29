@@ -998,12 +998,14 @@ aside.sidebar {
       <section class="section" id="features">
         <div class="head-row">
           <div>
-            <h2>Features</h2>
-            <p class="desc">Toggle agent capabilities. All off by default — enabling commits a YAML update to your repo.</p>
+            <h2>Features <span style="display:inline-block;margin-left:8px;padding:2px 8px;font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--cyan);background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);border-radius:999px;vertical-align:middle;">Coming in v2.15</span></h2>
+            <p class="desc">Per-feature toggles arrive with the v2.15 spec. Today, every minted agent gets the safe defaults: mention-only replies, owner approval for sensitive actions, and the rate / cost limits you set in <a href="#settings" style="color:var(--cyan);text-decoration:none;">Settings</a>.</p>
           </div>
         </div>
-        <div id="features-body">
-          <div class="skeleton tall"></div>
+        <div id="features-body" style="opacity:0.55;pointer-events:none;filter:grayscale(0.4);" aria-disabled="true">
+          <div style="padding:18px;border:1px dashed var(--border);border-radius:12px;background:rgba(34,211,238,0.03);color:var(--text-dim);font-size:13px;line-height:1.6;">
+            <strong style="color:var(--text);">Why disabled?</strong> The v2.14 schema your agent uses doesn't include a <code style="color:var(--cyan);font-family:var(--mono);font-size:12px;">features</code> block — toggling here would no-op silently. We'd rather show you nothing than lie. Track v2.15 in <a href="https://github.com/AgentMindCloud/grok-install/blob/main/manifest.json" style="color:var(--cyan);text-decoration:none;" target="_blank" rel="noopener">manifest.json</a>.
+          </div>
         </div>
       </section>
 
@@ -1916,7 +1918,7 @@ function loadAllSections() {
   renderHandleChip();
   loadOverview();
   loadAnalytics();
-  loadFeatures();
+  // loadFeatures() disabled — Features section is a v2.15 placeholder banner. Re-enable when v2.15 ships.
   loadMemory();
   loadSettings();
   loadUpdates();
