@@ -947,15 +947,17 @@ input[type="range"]::-moz-range-thumb {
   text-transform: uppercase;
 }
 .score-update { font-size: 12px; color: var(--green); }
-.score-circle {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--green);
-  display: flex; align-items: center; justify-content: center;
+.score-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--green);
+  background: rgba(74, 222, 128, 0.08);
   color: var(--green);
-  font-size: 22px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   font-family: var(--sans);
-  box-shadow: 0 0 24px rgba(74, 222, 128, 0.35);
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 16px rgba(74, 222, 128, 0.25);
+  white-space: nowrap;
 }
 
 .yaml-block {
@@ -2507,10 +2509,10 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <div class="sidebar-card" id="sidebar-card">
         <div class="score-head">
           <div>
-            <div class="score-label">Live safety score</div>
-            <div class="score-update">Updated as you build</div>
+            <div class="score-label">Spec compliance</div>
+            <div class="score-update">v2.14 schema-validated on mint</div>
           </div>
-          <div class="score-circle">99</div>
+          <div class="score-pill" aria-label="Compliant with grok-install v2.14 schema">✓ v2.14</div>
         </div>
         <div class="yaml-block">
           <div class="yaml-head">
@@ -2575,9 +2577,9 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
   <!-- ============ RECENTLY MINTED WALL ============ -->
   <section class="wall-section" id="wall">
     <div class="wall-head">
-      <div class="wall-eyebrow"><span class="dot"></span> Recently minted</div>
-      <h2>Live on <span class="accent">X</span></h2>
-      <p class="wall-sub">Every minted agent is unique. Each gets its own Genesis ID.</p>
+      <div class="wall-eyebrow"><span class="dot"></span> Browse</div>
+      <h2>Every <span class="accent">agent</span> on the wall</h2>
+      <p class="wall-sub">All minted agents in one feed. Click any card to visit its repo on GitHub.</p>
     </div>
     <div class="wall-cards" id="wall-full-cards" hidden></div>
     <div class="wall-empty" id="wall-full-empty">
