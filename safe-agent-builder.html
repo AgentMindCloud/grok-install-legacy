@@ -1594,20 +1594,6 @@ input[type="range"]::-moz-range-thumb {
   padding-top: 48px;
   border-top: 1px solid var(--border);
 }
-.wall-section.wall-inline {
-  margin-top: 0;
-  padding: 22px 24px;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.04), rgba(34, 211, 238, 0.03));
-  border: 1px solid var(--border-purple);
-  border-radius: 16px;
-  margin-bottom: 24px;
-}
-.wall-section.wall-inline .wall-head { margin-bottom: 14px; }
-.wall-section.wall-inline h2 { font-size: 22px; }
-.wall-section.wall-inline .wall-eyebrow { margin-bottom: 8px; }
-.wall-section.wall-inline .wall-empty { padding: 22px 18px; max-width: none; margin: 0; }
-.wall-section.wall-inline .wall-empty-mark { width: 36px; height: 36px; margin-bottom: 10px; font-size: 18px; }
-.wall-section.wall-inline .wall-empty-text { font-size: 15px; }
 .wall-head {
   text-align: center;
   margin-bottom: 28px;
@@ -1643,9 +1629,6 @@ input[type="range"]::-moz-range-thumb {
   gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   margin-top: 12px;
-}
-.wall-section.wall-inline .wall-cards {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 .wall-card {
   position: relative;
@@ -2127,20 +2110,6 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <span class="hpp-icon" aria-hidden="true">$</span>
       <span class="hpp-text">Free to mint · You set the daily cap · Billed via your xAI credits</span>
       <a class="hpp-link" href="pricing.html">Pricing &amp; trust →</a>
-    </div>
-  </section>
-
-  <!-- Recently minted preview (lives in the hero, full wall renders below) -->
-  <section class="wall-section wall-inline" id="wall-hero" aria-label="Recently minted preview">
-    <div class="wall-head">
-      <div class="wall-eyebrow"><span class="dot"></span> Recently minted</div>
-      <h2>Live on <span class="accent">X</span></h2>
-    </div>
-    <div class="wall-cards" id="wall-hero-cards" hidden></div>
-    <div class="wall-empty" id="wall-hero-empty">
-      <div class="wall-empty-mark">·</div>
-      <div class="wall-empty-text">The wall is quiet.</div>
-      <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
     </div>
   </section>
 
@@ -2996,19 +2965,11 @@ async function loadWall() {
   const real = (r.ok && r.body && Array.isArray(r.body.wall)) ? r.body.wall : [];
   const featuredCount = Math.max(0, 3 - real.length);
   const seeds = featuredCount > 0 ? FEATURED_SEEDS.slice(0, featuredCount) : [];
-  const heroItems = [...real.slice(0, 6), ...seeds].slice(0, 6);
   const fullItems = [...real, ...seeds];
 
-  const heroCards = document.getElementById('wall-hero-cards');
-  const heroEmpty = document.getElementById('wall-hero-empty');
   const fullCards = document.getElementById('wall-full-cards');
   const fullEmpty = document.getElementById('wall-full-empty');
 
-  if (heroCards && heroItems.length > 0) {
-    heroCards.innerHTML = heroItems.map(wallCardHtml).join('');
-    heroCards.hidden = false;
-    if (heroEmpty) heroEmpty.style.display = 'none';
-  }
   if (fullCards && fullItems.length > 0) {
     fullCards.innerHTML = fullItems.map(wallCardHtml).join('');
     fullCards.hidden = false;
