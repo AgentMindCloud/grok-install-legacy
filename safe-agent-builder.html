@@ -278,6 +278,21 @@ nav {
   .hero-pricing-pill { font-size: 11px; gap: 8px; padding: 8px 14px; }
   .hero-pricing-pill .hpp-link { padding-left: 8px; }
 }
+@media (max-width: 380px) {
+  .hero-pricing-pill {
+    font-size: 10.5px;
+    padding: 7px 12px;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+  .hero-pricing-pill .hpp-icon {
+    width: 16px; height: 16px; font-size: 10px;
+  }
+  .hero-pricing-pill .hpp-link {
+    padding-left: 6px;
+    border-left-color: rgba(74, 222, 128, 0.2);
+  }
+}
 
 /* Path tabs */
 .path-tabs {
@@ -1921,7 +1936,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
   <div class="user-flow-track">
 
     <!-- 1. Configure -->
-    <div class="user-flow-step">
+    <div class="user-flow-step" id="user-flow-step-1">
       <div class="flow-step-meta">
         <span class="flow-step-num">01</span>
       </div>
@@ -1931,8 +1946,8 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <path d="M5 21l1-2M19 21l-1-2M5 3l1 2M19 3l-1 2"/>
         </svg>
       </div>
-      <div class="flow-step-title">Configure here</div>
-      <div class="flow-step-desc">Mint or pick template</div>
+      <div class="flow-step-title" id="user-flow-step-1-title">Configure here</div>
+      <div class="flow-step-desc" id="user-flow-step-1-desc">Mint or pick template</div>
     </div>
 
     <!-- 2. Repo created (AUTO) -->
@@ -3191,7 +3206,18 @@ for (let i = 0; i < 20; i++) {
   particles.appendChild(p);
 }
 
-// Path tab switching
+// Path tab switching + user-flow diagram step 1 awareness
+const FLOW_STEP_1 = {
+  signal:   { title: 'Mint your agent',  desc: 'From your X signal' },
+  template: { title: 'Pick a template',  desc: 'Pre-tuned, 60 seconds' },
+};
+function syncUserFlowStep1(flow) {
+  const t = document.getElementById('user-flow-step-1-title');
+  const d = document.getElementById('user-flow-step-1-desc');
+  const labels = FLOW_STEP_1[flow] || { title: 'Configure here', desc: 'Mint or pick template' };
+  if (t) t.textContent = labels.title;
+  if (d) d.textContent = labels.desc;
+}
 document.querySelectorAll('.path-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.flow;
@@ -3204,9 +3230,15 @@ document.querySelectorAll('.path-tab').forEach(tab => {
     document.querySelectorAll('.flow-panel').forEach(panel => {
       panel.classList.toggle('active', panel.dataset.flow === target);
     });
+    syncUserFlowStep1(target);
     window.scrollTo({ top: document.querySelector('.path-tabs').offsetTop - 20, behavior: 'smooth' });
   });
 });
+// Initialize step 1 copy from the initially-active tab
+(function () {
+  const active = document.querySelector('.path-tab.active');
+  if (active && active.dataset.flow) syncUserFlowStep1(active.dataset.flow);
+})();
 
 // In-flow stepper wiring (Phase F3)
 function wireFlowStepper(panel) {
