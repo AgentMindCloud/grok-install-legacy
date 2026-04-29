@@ -93,17 +93,15 @@ To mint your own: visit [agentmindcloud.github.io/grok-install/safe-agent-builde
 
 ## Deploying the Worker (maintainers)
 
-The API Worker config lives at `worker/wrangler.toml`. The unrelated `wrangler.pages.jsonc` at the root is a parked static-assets config for an optional Jekyll-on-Workers deploy and is not used in CI; it's named `grok-install-pages` to avoid colliding with the API Worker (`grok-install-api`).
+The API Worker config lives at `wrangler.toml` at the repo root (the JS source stays in `worker/src/`; `main` in the config points there). The unrelated `wrangler.pages.jsonc` at the root is a parked static-assets config for an optional Jekyll-on-Workers deploy and is not used in CI; it's named `grok-install-pages` to avoid colliding with the API Worker (`grok-install-api`).
 
-The API Worker auto-deploys to Cloudflare on every push to `main` via Cloudflare Workers Builds (Deploy command: `npx wrangler deploy --config worker/wrangler.toml`). Manual deploys still work:
+The API Worker auto-deploys to Cloudflare on every push to `main` via Cloudflare Workers Builds (Deploy command: `npx wrangler deploy`). Manual deploys still work:
 
 ```bash
-npm run worker:deploy           # wrangler deploy --config worker/wrangler.toml
+npm run worker:deploy           # wrangler deploy
 npm run worker:dev              # local dev server
 npm run worker:tail             # live log stream
 ```
-
-Running `wrangler` from the project root without `--config` no longer picks up any default config (the parked `wrangler.pages.jsonc` is not on Wrangler's default search list) — always use the npm script or pass the flag explicitly.
 
 ## Contributing
 
