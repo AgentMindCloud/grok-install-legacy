@@ -472,7 +472,8 @@ nav {
 
 .quick-mint-section--ultra {
   max-width: 760px;
-  margin: 36px auto 8px;
+  /* margins balanced so the card visually centers between hero and path-tabs */
+  margin: 10px auto 26px;
   padding: 0 8px;
   position: relative;
   isolation: isolate;
@@ -2738,12 +2739,34 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 .user-flow-step:nth-child(6) .flow-step-icon {
   border-color: var(--border-purple);
   color: var(--purple-bright);
-  background: rgba(167, 139, 250, 0.06);
+  background: rgba(167, 139, 250, 0.12);
+  box-shadow:
+    0 0 18px rgba(167, 139, 250, 0.22),
+    inset 0 0 18px rgba(167, 139, 250, 0.10);
 }
 .user-flow-step:nth-child(1) .flow-step-icon,
 .user-flow-step:nth-child(3) .flow-step-icon,
 .user-flow-step:nth-child(5) .flow-step-icon {
-  background: rgba(74, 222, 128, 0.06);
+  background: rgba(74, 222, 128, 0.10);
+  box-shadow:
+    0 0 18px rgba(74, 222, 128, 0.20),
+    inset 0 0 18px rgba(74, 222, 128, 0.08);
+}
+/* AUTO badge takes the same colour as its step's icon — purple on
+   even steps, green on odd. */
+.user-flow-step:nth-child(2) .flow-step-auto,
+.user-flow-step:nth-child(4) .flow-step-auto,
+.user-flow-step:nth-child(6) .flow-step-auto {
+  border-color: var(--border-purple);
+  color: var(--purple-bright);
+  background: rgba(167, 139, 250, 0.10);
+}
+.user-flow-step:nth-child(1) .flow-step-auto,
+.user-flow-step:nth-child(3) .flow-step-auto,
+.user-flow-step:nth-child(5) .flow-step-auto {
+  border-color: rgba(74, 222, 128, 0.4);
+  color: var(--green);
+  background: rgba(74, 222, 128, 0.10);
 }
 
 .flow-step-title {
