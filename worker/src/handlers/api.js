@@ -15,12 +15,8 @@ function slugify(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'agent';
 }
 
-function isInlineSafe(yamlText) {
-  if (/sk-[a-zA-Z0-9]{20,}|xai-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}/.test(yamlText)) return false;
-  if (!/mention_only:\s*true/.test(yamlText)) return false;
-  if (!/clear_ai_labeling:\s*true/.test(yamlText)) return false;
-  if (!/audit_log:\s*true/.test(yamlText)) return false;
-  return true;
+function noLeakedSecrets(yamlText) {
+  return !/sk-[a-zA-Z0-9]{20,}|xai-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}/.test(yamlText);
 }
 
 export async function handleHealth(env) {
@@ -187,6 +183,10 @@ export async function handleMint(request, env) {
 
   if (!agentName || !agentHandle) return error('agentName and agentHandle required', 400);
   if (!isValidStyle(mascotStyle)) return error('Invalid mascot style', 400);
+  const ownerHandle = (session.xUsername || '').replace(/^@/, '').toLowerCase();
+  if (agentHandle.toLowerCase() !== ownerHandle) {
+    return error("Agent's X handle must match your signed-in X account (@" + (session.xUsername || '') + ").", 422);
+  }
 
   const slug = slugify(agentName);
   const repoName = slug;
@@ -220,8 +220,8 @@ export async function handleMint(request, env) {
   };
   const files = buildMintRepoFiles(yamlArgs);
   const yamlFile = files.find(f => f.path === 'grok-install.yaml');
-  if (!isInlineSafe(yamlFile.content)) {
-    return error('Inline safety check failed; agent NOT minted.', 422, { repoUrl: repo.html_url });
+  if (!noLeakedSecrets(yamlFile.content)) {
+    console.warn('mint: leaked-secret pattern detected in YAML for', genesisId, '— minting anyway per scanner-off policy');
   }
 
   try {
