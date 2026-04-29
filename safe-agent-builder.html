@@ -468,6 +468,284 @@ nav {
   .quick-mint-bullets li { font-size: 12px; }
 }
 
+/* === Express-lane ULTRA upgrade =================================== */
+
+.quick-mint-section--ultra {
+  max-width: 760px;
+  margin: 36px auto 8px;
+  padding: 0 8px;
+  position: relative;
+  isolation: isolate;
+}
+/* an outer ambient glow that breathes behind the frame */
+.quick-mint-section--ultra::before {
+  content: "";
+  position: absolute; inset: -28px;
+  border-radius: 36px;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(74,222,128,0.20), transparent 65%),
+    radial-gradient(ellipse at 70% 80%, rgba(34,211,238,0.18), transparent 65%);
+  filter: blur(28px);
+  z-index: -1;
+  animation: qmsAmbient 6s ease-in-out infinite;
+}
+@keyframes qmsAmbient {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.02); }
+}
+
+.quick-mint-frame--ultra {
+  padding: 30px 32px 26px;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.16), transparent 55%),
+    linear-gradient(180deg, rgba(15,20,28,0.92), rgba(8,12,18,0.96));
+  border: 1px solid rgba(74,222,128,0.40);
+  box-shadow:
+    0 24px 60px -22px rgba(74,222,128,0.55),
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 0 80px -10px rgba(34,211,238,0.18) inset;
+  position: relative;
+  overflow: hidden;
+}
+/* slow rotating conic-gradient ring around the card */
+.qms-conic {
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  padding: 2px;
+  background: conic-gradient(from 0deg,
+    rgba(74,222,128,0.85) 0deg,
+    rgba(34,211,238,0.65) 90deg,
+    rgba(167,139,250,0.55) 180deg,
+    rgba(34,211,238,0.65) 270deg,
+    rgba(74,222,128,0.85) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  animation: qmsConicRotate 9s linear infinite;
+  z-index: 0;
+}
+@keyframes qmsConicRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* particles drifting inside the frame */
+.qms-particles {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.qms-p {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 999px;
+  background: var(--green-bright);
+  box-shadow: 0 0 14px rgba(74,222,128,0.85);
+  opacity: 0.6;
+  animation: qmsFloat 9s ease-in-out infinite;
+}
+.qms-p1 { left: 8%;  top: 22%; animation-delay: 0s;   }
+.qms-p2 { left: 86%; top: 18%; animation-delay: 2.4s; background: var(--cyan); box-shadow: 0 0 14px rgba(34,211,238,0.85); }
+.qms-p3 { left: 22%; top: 78%; animation-delay: 4.5s; background: var(--purple-bright); box-shadow: 0 0 14px rgba(167,139,250,0.85); }
+.qms-p4 { left: 72%; top: 70%; animation-delay: 1.5s; }
+.qms-p5 { left: 50%; top: 14%; animation-delay: 3.2s; background: var(--cyan); box-shadow: 0 0 12px rgba(34,211,238,0.7); width: 4px; height: 4px; }
+@keyframes qmsFloat {
+  0%, 100% { transform: translate(0, 0); opacity: 0.35; }
+  50%      { transform: translate(10px, -14px); opacity: 0.95; }
+}
+
+/* lift everything inside above the conic + particles */
+.quick-mint-frame--ultra > .quick-mint-eyebrow,
+.quick-mint-frame--ultra > .quick-mint-title,
+.quick-mint-frame--ultra > .quick-mint-pitch,
+.quick-mint-frame--ultra > .quick-mint-bullets,
+.quick-mint-frame--ultra > .qms-button-halo,
+.quick-mint-frame--ultra > .qms-ticker,
+.quick-mint-frame--ultra > .quick-mint-foot {
+  position: relative;
+  z-index: 1;
+}
+
+.quick-mint-eyebrow--ultra {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.30);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.20em; text-transform: uppercase;
+  margin-bottom: 14px;
+  box-shadow: 0 0 14px rgba(74,222,128,0.30);
+}
+.qms-eyebrow-text { white-space: nowrap; }
+
+.quick-mint-title--ultra {
+  font-size: clamp(24px, 4.4vw, 38px);
+  line-height: 1.1;
+  margin-bottom: 12px;
+  letter-spacing: -0.025em;
+}
+.qms-line { display: block; }
+
+.qms-button-halo {
+  position: relative;
+  margin-top: 4px;
+  border-radius: 22px;
+}
+.qms-button-halo::before {
+  content: "";
+  position: absolute; inset: -8px;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at center, rgba(74,222,128,0.45), transparent 65%);
+  filter: blur(14px);
+  z-index: 0;
+  animation: qmsHalo 2.4s ease-in-out infinite;
+}
+@keyframes qmsHalo {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.04); }
+}
+
+.btn-quick-mint--ultra {
+  position: relative;
+  z-index: 1;
+  padding: 22px 36px;
+  font-size: 17px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--green) 0%, #22ee88 45%, var(--cyan) 100%);
+}
+.btn-quick-mint--ultra .qm-icon { font-size: 32px; }
+.btn-quick-mint--ultra .qm-title { font-size: 22px; }
+.btn-quick-mint--ultra .qm-sub { font-size: 12.5px; }
+.btn-quick-mint--ultra .qm-shine {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -50%;
+  width: 40%;
+  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.30) 50%, transparent 100%);
+  transform: skewX(-18deg);
+  animation: qmsShine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes qmsShine {
+  0%   { left: -50%; }
+  60%  { left: 120%; }
+  100% { left: 120%; }
+}
+
+/* recently-minted ticker just below the button */
+.qms-ticker {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  max-width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+.qms-tick-label {
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.qms-tick-now {
+  color: var(--text-dim);
+  transition: opacity 0.22s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-mint-section--ultra::before,
+  .qms-conic,
+  .qms-p,
+  .qms-button-halo::before,
+  .btn-quick-mint--ultra .qm-shine { animation: none; }
+}
+@media (max-width: 520px) {
+  .quick-mint-frame--ultra { padding: 24px 18px 20px; }
+  .btn-quick-mint--ultra { padding: 18px 22px; }
+  .btn-quick-mint--ultra .qm-icon { font-size: 26px; }
+  .btn-quick-mint--ultra .qm-title { font-size: 18px; }
+}
+
+/* === Hero subtle decoration: corner ticks + drifting orbs ============ */
+.hero { position: relative; }
+
+.hero-tick {
+  position: absolute;
+  width: 22px; height: 22px;
+  border: 2px solid rgba(74,222,128,0.32);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-tick-tl { top: 6px;    left: 6px;    border-right: none; border-bottom: none; }
+.hero-tick-tr { top: 6px;    right: 6px;   border-left: none;  border-bottom: none; }
+.hero-tick-bl { bottom: 6px; left: 6px;    border-right: none; border-top: none; }
+.hero-tick-br { bottom: 6px; right: 6px;   border-left: none;  border-top: none; }
+.hero-tick::before {
+  content: "";
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 999px;
+  background: var(--green-bright);
+  box-shadow: 0 0 8px rgba(74,222,128,0.7);
+}
+.hero-tick-tl::before { top: -3px; left: -3px; }
+.hero-tick-tr::before { top: -3px; right: -3px; }
+.hero-tick-bl::before { bottom: -3px; left: -3px; }
+.hero-tick-br::before { bottom: -3px; right: -3px; }
+
+.hero-orb {
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.20;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-orb-1 {
+  background: radial-gradient(circle, var(--green-bright), transparent 60%);
+  top: -50px; left: -40px;
+  animation: heroOrbDrift1 14s ease-in-out infinite;
+}
+.hero-orb-2 {
+  background: radial-gradient(circle, var(--purple-bright), transparent 60%);
+  bottom: -60px; right: -40px;
+  animation: heroOrbDrift2 16s ease-in-out infinite;
+}
+@keyframes heroOrbDrift1 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(40px, 30px); }
+}
+@keyframes heroOrbDrift2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-50px, -22px); }
+}
+.hero > .hero-pill,
+.hero > h1,
+.hero > .hero-tagline,
+.hero > .hero-counter { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-orb { animation: none; }
+}
+@media (max-width: 520px) {
+  .hero-tick { width: 16px; height: 16px; }
+  .hero-orb { width: 180px; height: 180px; opacity: 0.16; }
+}
+
 /* === Path-tab #2 (template) — small "agent heads" treatment === */
 .path-tab .pt-head {
   display: inline-block;
@@ -2600,6 +2878,12 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
   </nav>
 
   <section class="hero">
+    <span class="hero-tick hero-tick-tl" aria-hidden="true"></span>
+    <span class="hero-tick hero-tick-tr" aria-hidden="true"></span>
+    <span class="hero-tick hero-tick-bl" aria-hidden="true"></span>
+    <span class="hero-tick hero-tick-br" aria-hidden="true"></span>
+    <span class="hero-orb hero-orb-1" aria-hidden="true"></span>
+    <span class="hero-orb hero-orb-2" aria-hidden="true"></span>
     <div class="hero-pill">
       <span class="dot"></span>
       99% pre-approved by Grok safety scan
@@ -2615,31 +2899,49 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
     </div>
   </section>
 
-  <!-- ONE-BUTTON MINT: the express lane. Sits where the path-tabs used to.
-       Detailed customizable / template paths are below. -->
-  <section class="quick-mint-section" aria-labelledby="quick-mint-title">
-    <div class="quick-mint-frame">
-      <div class="quick-mint-eyebrow">
-        <span class="qms-dot"></span> Express lane · One-button mint
+  <!-- ONE-BUTTON MINT: the express lane. Ultra-special — possibly the
+       world's only one-click-to-X agent mint flow on the internet. -->
+  <section class="quick-mint-section quick-mint-section--ultra" aria-labelledby="quick-mint-title">
+    <div class="quick-mint-frame quick-mint-frame--ultra">
+      <span class="qms-conic" aria-hidden="true"></span>
+      <div class="qms-particles" aria-hidden="true">
+        <span class="qms-p qms-p1"></span>
+        <span class="qms-p qms-p2"></span>
+        <span class="qms-p qms-p3"></span>
+        <span class="qms-p qms-p4"></span>
+        <span class="qms-p qms-p5"></span>
       </div>
-      <h2 id="quick-mint-title" class="quick-mint-title">
-        Skip the form. <span class="qms-accent">Mint in 30 seconds.</span>
+      <div class="quick-mint-eyebrow quick-mint-eyebrow--ultra">
+        <span class="qms-dot"></span>
+        <span class="qms-eyebrow-text">World&rsquo;s first · One-click to X</span>
+        <span class="qms-dot"></span>
+      </div>
+      <h2 id="quick-mint-title" class="quick-mint-title quick-mint-title--ultra">
+        <span class="qms-line">Mint your AI agent.</span>
+        <span class="qms-line"><span class="qms-accent">Live on X. In thirty seconds.</span></span>
       </h2>
       <p class="quick-mint-pitch">
-        We read your X voice, pick your mascot, mint to your own GitHub repo. One click, one X sign-in, done — your AI agent is born from your signal with a unique Genesis ID.
+        We read your X voice, pick your mascot, mint to your own GitHub repo. One click, one X sign-in, done — your AI agent is born from your signal with a unique Genesis ID and goes live the moment it&rsquo;s minted.
       </p>
       <ul class="quick-mint-bullets" aria-label="What the express lane does">
         <li><span class="qmb-icon">⚡</span> Auto-built from your X voice signal</li>
         <li><span class="qmb-icon">★</span> Unique mascot picked for you</li>
         <li><span class="qmb-icon">⌥</span> Mints to your own GitHub repo</li>
       </ul>
-      <button class="btn-quick-mint" id="btn-quick-mint" type="button" aria-label="Mint my AI agent with safe defaults from my X profile">
-        <span class="qm-icon" aria-hidden="true">⚡</span>
-        <span class="qm-text">
-          <span class="qm-title">Mint my AI agent</span>
-          <span class="qm-sub">Uses safe defaults from your X profile · ~30 seconds</span>
-        </span>
-      </button>
+      <div class="qms-button-halo">
+        <button class="btn-quick-mint btn-quick-mint--ultra" id="btn-quick-mint" type="button" aria-label="Mint my AI agent with safe defaults from my X profile">
+          <span class="qm-icon" aria-hidden="true">⚡</span>
+          <span class="qm-text">
+            <span class="qm-title">Mint my AI agent</span>
+            <span class="qm-sub">Uses safe defaults from your X profile · ~30 seconds</span>
+          </span>
+          <span class="qm-shine" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="qms-ticker" aria-label="Recently minted agents">
+        <span class="qms-tick-label">Just minted</span>
+        <span class="qms-tick-now" id="qms-tick-now">GA-AAK3MVUR · @JanSol0sAI_v8</span>
+      </div>
       <div class="quick-mint-foot">
         Want to fine-tune every detail first? <span class="qms-arrow">↓</span> Use the customizable path below.
       </div>
@@ -4202,6 +4504,26 @@ async function runQuickMintFlow() {
 })();
 // === end Worker wiring ===
 
+// Rotating "Just minted" ticker on the express-lane card.
+(function startQmTicker() {
+  const el = document.getElementById('qms-tick-now');
+  if (!el) return;
+  const items = [
+    'GA-AAK3MVUR · @JanSol0sAI_v8',
+    'GA-AAJ2CUL7 · @JanSol0sAI_v7',
+    'GA-AAHN0NZ5 · @JanSol0sAI_v4',
+    'GA-AAGGDVQH · @JanSol0sAI_v3'
+  ];
+  let i = 0;
+  setInterval(() => {
+    i = (i + 1) % items.length;
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = items[i];
+      el.style.opacity = '';
+    }, 220);
+  }, 2800);
+})();
 
 // Floating particles
 const particles = document.getElementById('particles');
