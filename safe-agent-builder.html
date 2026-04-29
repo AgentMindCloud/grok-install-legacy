@@ -5,6 +5,21 @@
 <meta name="worker-url" content="https://grok-install-api.jani-starck2.workers.dev">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>grok-install — Build a Safe AI Agent in 60 seconds</title>
+<meta name="description" content="Build a safe AI agent that lives on X. Mint your agent in 60 seconds — 100% yours, Apache 2.0, billed via your xAI credits.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="grok-install — Build a Safe AI Agent in 60 seconds">
+<meta property="og:description" content="Mint your agent in 60 seconds. 100% yours. Apache 2.0. Free to mint — billed via your xAI credits.">
+<meta property="og:image" content="https://agentmindcloud.github.io/grok-install/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://agentmindcloud.github.io/grok-install/safe-agent-builder.html">
+<meta property="og:site_name" content="grok-install">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@JanSol0s">
+<meta name="twitter:creator" content="@JanSol0s">
+<meta name="twitter:title" content="grok-install — Build a Safe AI Agent in 60 seconds">
+<meta name="twitter:description" content="Mint your agent in 60 seconds. 100% yours. Apache 2.0. Free to mint — billed via your xAI credits.">
+<meta name="twitter:image" content="https://agentmindcloud.github.io/grok-install/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1332,6 +1347,81 @@ input[type="range"]::-moz-range-thumb {
   font-size: 14px;
 }
 
+.wall-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  margin-top: 12px;
+}
+.wall-section.wall-inline .wall-cards {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.wall-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-purple);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex; gap: 12px; align-items: center;
+  text-decoration: none; color: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.wall-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--purple);
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15);
+}
+.wall-card.featured {
+  border-style: dashed;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), rgba(34, 211, 238, 0.03));
+}
+.wall-card-mark {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-size: 16px; font-weight: 700;
+  color: var(--bg);
+  background: linear-gradient(135deg, #4ade80, #22d3ee);
+  overflow: hidden;
+}
+.wall-card-mark img { width: 100%; height: 100%; object-fit: cover; }
+.wall-card-body {
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1;
+}
+.wall-card-name {
+  font-size: 14px; font-weight: 600;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wall-card-handle {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wall-card-id {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--purple-bright);
+  background: rgba(167, 139, 250, 0.1);
+  padding: 2px 7px; border-radius: 4px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.wall-card.featured .wall-card-id {
+  color: var(--text-faint);
+  background: rgba(75, 85, 99, 0.18);
+}
+.wall-card-featured-tag {
+  position: absolute; top: 8px; right: 10px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+
 .wall-empty {
   max-width: 520px; margin: 32px auto 0;
   background: var(--bg-card);
@@ -1749,6 +1839,20 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
     </div>
   </section>
 
+  <!-- Recently minted preview (lives in the hero, full wall renders below) -->
+  <section class="wall-section wall-inline" id="wall-hero" aria-label="Recently minted preview">
+    <div class="wall-head">
+      <div class="wall-eyebrow"><span class="dot"></span> Recently minted</div>
+      <h2>Live on <span class="accent">X</span></h2>
+    </div>
+    <div class="wall-cards" id="wall-hero-cards" hidden></div>
+    <div class="wall-empty" id="wall-hero-empty">
+      <div class="wall-empty-mark">·</div>
+      <div class="wall-empty-text">The wall is quiet.</div>
+      <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
+    </div>
+  </section>
+
   <!-- PATH SELECTOR -->
   <div class="path-tabs path-tabs-big">
     <button class="path-tab purple active" data-flow="signal">
@@ -1891,19 +1995,6 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 </section>
 
   <!-- end user-flow diagram -->
-
-  <!-- Recently minted preview (Phase F10) — full wall still rendered below -->
-  <section class="wall-section wall-inline" id="wall-preview" aria-label="Recently minted preview">
-    <div class="wall-head">
-      <div class="wall-eyebrow"><span class="dot"></span> Recently minted</div>
-      <h2>Live on <span class="accent">X</span></h2>
-    </div>
-    <div class="wall-empty" id="wall-preview-empty">
-      <div class="wall-empty-mark">·</div>
-      <div class="wall-empty-text">The wall is quiet.</div>
-      <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
-    </div>
-  </section>
 
   <div class="workspace">
     <!-- LEFT: WIZARD AREA -->
@@ -2465,7 +2556,8 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
       <h2>Live on <span class="accent">X</span></h2>
       <p class="wall-sub">Every minted agent is unique. Each gets its own Genesis ID.</p>
     </div>
-    <div class="wall-empty">
+    <div class="wall-cards" id="wall-full-cards" hidden></div>
+    <div class="wall-empty" id="wall-full-empty">
       <div class="wall-empty-mark">·</div>
       <div class="wall-empty-text">The wall is quiet.</div>
       <div class="wall-empty-sub">Be the first to mint. Your specimen number will be 0001.</div>
@@ -2521,12 +2613,91 @@ async function loadStats() {
   if (counters[1]) counters[1].textContent = r.body.today ?? 0;
 }
 
+const FEATURED_SEEDS = [
+  {
+    name: 'DemoBriefBot',
+    handle: 'JanSol0sDemo',
+    genesisId: 'GA-DEMO0001',
+    repoUrl: 'https://github.com/AgentMindCloud/grok-install',
+    mascotStyle: 'liquid_gold',
+    mascotUrl: null,
+    featured: true,
+  },
+  {
+    name: 'DemoSignalAI',
+    handle: 'grokinstall',
+    genesisId: 'GA-DEMO0002',
+    repoUrl: 'https://github.com/AgentMindCloud/grok-install',
+    mascotStyle: 'cyberpunk_neon',
+    mascotUrl: null,
+    featured: true,
+  },
+  {
+    name: 'DemoAskMe',
+    handle: 'agentmindcloud',
+    genesisId: 'GA-DEMO0003',
+    repoUrl: 'https://github.com/AgentMindCloud/grok-install',
+    mascotStyle: 'specimen_plate',
+    mascotUrl: null,
+    featured: true,
+  },
+];
+
+const MASCOT_GRADIENTS = {
+  cyberpunk_neon: 'linear-gradient(135deg, #f0abfc, #22d3ee)',
+  retro_pixel: 'linear-gradient(135deg, #fde047, #f97316)',
+  anime_portrait: 'linear-gradient(135deg, #fbcfe8, #c084fc)',
+  hand_sketched: 'linear-gradient(135deg, #d6d3d1, #57534e)',
+  liquid_gold: 'linear-gradient(135deg, #fbbf24, #d97706)',
+  dark_glass: 'linear-gradient(135deg, #1e293b, #475569)',
+  comic_ink: 'linear-gradient(135deg, #f87171, #1f2937)',
+  specimen_plate: 'linear-gradient(135deg, #d4a341, #f5ead4)',
+};
+
+function wallCardHtml(item) {
+  const name = escapeHtmlBuilder(item.agentName || item.name || 'Agent');
+  const handle = escapeHtmlBuilder(item.agentHandle || item.handle || '');
+  const genesisId = escapeHtmlBuilder(item.genesisId || '');
+  const initial = (name || 'A').slice(0, 1).toUpperCase();
+  const gradient = MASCOT_GRADIENTS[item.mascotStyle] || MASCOT_GRADIENTS.specimen_plate;
+  const mark = item.mascotUrl
+    ? `<img src="${escapeHtmlBuilder(item.mascotUrl)}" alt="" loading="lazy">`
+    : initial;
+  const href = item.repoUrl ? escapeHtmlBuilder(item.repoUrl) : '#';
+  const featured = item.featured ? '<span class="wall-card-featured-tag">demo seed</span>' : '';
+  const featuredClass = item.featured ? ' featured' : '';
+  return `<a class="wall-card${featuredClass}" href="${href}" target="_blank" rel="noopener" aria-label="${name} on the wall">
+    <span class="wall-card-mark" style="background:${gradient};">${mark}</span>
+    <span class="wall-card-body">
+      <span class="wall-card-name">${name}</span>
+      <span class="wall-card-handle">@${handle}</span>
+      <span class="wall-card-id">${genesisId}</span>
+    </span>${featured}
+  </a>`;
+}
+
 async function loadWall() {
   const r = await safeFetch(WORKER_URL + '/api/wall');
-  if (!r.ok || !r.body) return;
-  const wall = Array.isArray(r.body.wall) ? r.body.wall : [];
-  if (wall.length > 0) {
-    document.querySelectorAll('.wall-empty').forEach(el => { el.style.display = 'none'; });
+  const real = (r.ok && r.body && Array.isArray(r.body.wall)) ? r.body.wall : [];
+  const featuredCount = Math.max(0, 3 - real.length);
+  const seeds = featuredCount > 0 ? FEATURED_SEEDS.slice(0, featuredCount) : [];
+  const heroItems = [...real.slice(0, 6), ...seeds].slice(0, 6);
+  const fullItems = [...real, ...seeds];
+
+  const heroCards = document.getElementById('wall-hero-cards');
+  const heroEmpty = document.getElementById('wall-hero-empty');
+  const fullCards = document.getElementById('wall-full-cards');
+  const fullEmpty = document.getElementById('wall-full-empty');
+
+  if (heroCards && heroItems.length > 0) {
+    heroCards.innerHTML = heroItems.map(wallCardHtml).join('');
+    heroCards.hidden = false;
+    if (heroEmpty) heroEmpty.style.display = 'none';
+  }
+  if (fullCards && fullItems.length > 0) {
+    fullCards.innerHTML = fullItems.map(wallCardHtml).join('');
+    fullCards.hidden = false;
+    if (fullEmpty) fullEmpty.style.display = 'none';
   }
 }
 
@@ -2658,6 +2829,8 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashbo
     '<pre id="mint-install-text" style="background:#07090d;border:1px solid rgba(167,139,250,0.25);padding:12px;border-radius:10px;font-size:14px;font-weight:600;white-space:pre-wrap;color:#c4b5fd;margin:0 0 10px;font-family:JetBrains Mono,monospace;">' + escapeHtml(comment) + '</pre>' +
     '<button id="mint-copy-comment" type="button" style="width:100%;padding:11px 16px;background:linear-gradient(135deg,rgba(167,139,250,0.18),rgba(34,211,238,0.12));border:1px solid rgba(167,139,250,0.35);border-radius:10px;color:#c4b5fd;font-weight:600;cursor:pointer;margin-bottom:18px;">Copy install comment</button>' +
 
+    // Specimen plate download
+    (genesisId ? '<a id="mint-specimen" href="' + WORKER_URL + '/api/specimen/' + encodeURIComponent(genesisId) + '.svg" target="_blank" rel="noopener" style="display:block;text-align:center;padding:11px 16px;background:linear-gradient(135deg,rgba(212,163,65,0.18),rgba(245,234,212,0.08));border:1px solid rgba(212,163,65,0.35);border-radius:10px;color:#fbbf24;font-weight:600;text-decoration:none;margin-bottom:10px;">Download specimen plate (1080×1920)</a>' : '') +
     (safeDash ? '<a id="mint-dash" href="' + safeDash + '" style="display:block;text-align:center;padding:11px 16px;background:#151b26;border:1px solid rgba(167,139,250,0.25);border-radius:10px;color:#c4b5fd;font-weight:500;text-decoration:none;margin-bottom:6px;">Open dashboard</a>' : '') +
     '<button id="mint-close" type="button" style="margin-top:8px;width:100%;padding:8px;background:transparent;border:none;color:#6b7280;font-size:12px;cursor:pointer;">Close</button>' +
     '</div>';
