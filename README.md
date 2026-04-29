@@ -93,7 +93,7 @@ To mint your own: visit [agentmindcloud.github.io/grok-install/safe-agent-builde
 
 ## Deploying the Worker (maintainers)
 
-The API Worker config lives at `wrangler.toml` at the repo root (the JS source stays in `worker/src/`; `main` in the config points there). The unrelated `wrangler.pages.jsonc` at the root is a parked static-assets config for an optional Jekyll-on-Workers deploy and is not used in CI; it's named `grok-install-pages` to avoid colliding with the API Worker (`grok-install-api`).
+The API Worker config lives at `wrangler.toml` at the repo root (the JS source stays in `worker/src/`; `main` in the config points there).
 
 The API Worker auto-deploys to Cloudflare on every push to `main` via Cloudflare Workers Builds (Deploy command: `npx wrangler deploy`). Manual deploys still work:
 
