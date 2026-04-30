@@ -468,15 +468,100 @@ nav {
   .quick-mint-bullets li { font-size: 12px; }
 }
 
+/* === Connections row: X + GitHub OAuth status =================== */
+.connections {
+  max-width: 760px;
+  margin: 4px auto 0;
+  padding: 0 16px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+.conn-cell {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(15,20,28,0.65);
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  transition: border-color 0.20s ease, color 0.20s ease, box-shadow 0.20s ease, background 0.20s ease;
+}
+.conn-cell .conn-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px;
+  font-size: 13px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.conn-cell .conn-label {
+  color: var(--text-faint);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.conn-cell .conn-status {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.conn-cell .conn-status a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+}
+.conn-cell .conn-status a:hover {
+  color: var(--text);
+  border-bottom-style: solid;
+}
+.conn-cell .conn-check {
+  color: var(--green);
+  margin-left: 4px;
+  text-shadow: 0 0 8px rgba(74,222,128,0.5);
+}
+.conn-cell[data-state="off"] {
+  border-color: rgba(245,200,80,0.40);
+  background: rgba(245,200,80,0.06);
+  cursor: pointer;
+}
+.conn-cell[data-state="off"] .conn-icon,
+.conn-cell[data-state="off"] .conn-label,
+.conn-cell[data-state="off"] .conn-status,
+.conn-cell[data-state="off"] .conn-status a {
+  color: #fbbf24;
+}
+.conn-cell[data-state="pending"] .conn-icon { color: var(--text-faint); }
+.conn-cell[data-state="on"] {
+  border-color: rgba(74,222,128,0.40);
+  background: rgba(74,222,128,0.06);
+  box-shadow: 0 0 14px rgba(74,222,128,0.18);
+}
+.conn-cell[data-state="on"] .conn-icon,
+.conn-cell[data-state="on"] .conn-label {
+  color: var(--green);
+}
+.conn-cell[data-state="on"] .conn-status { color: var(--text); }
+.conn-sep {
+  color: var(--text-faint);
+  font-family: var(--mono);
+}
+@media (max-width: 520px) {
+  .connections { padding: 0 12px; gap: 6px; }
+  .conn-cell { padding: 5px 11px; font-size: 11px; }
+  .conn-sep { display: none; }
+}
+
 /* === Express-lane ULTRA upgrade =================================== */
 
 .quick-mint-section--ultra {
   max-width: 760px;
-  /* Negative top margin pulls the card up into the hero's 48px bottom
-     padding so the visible gap above and below the card is roughly
-     equal — the card reads as the visual center between hero and
-     path-tabs. */
-  margin: -32px auto 24px;
+  /* The previous -32px negative top margin pulled the card up into
+     the hero's 48px bottom padding. Now that the connections row
+     occupies that space (its ~32px height + small margins fills the
+     gap), the express-lane sits at margin-top 0 and the card stays
+     visually centered between hero and path-tabs. */
+  margin: 0 auto 24px;
   padding: 0 8px;
   position: relative;
   isolation: isolate;
@@ -2955,6 +3040,25 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
     </div>
   </section>
 
+  <!-- Connections: visible status of the X + GitHub OAuth links. Sits
+       above the express-lane so the user sees the platform is holding
+       their credentials regardless of which mint path they take. -->
+  <section class="connections" aria-label="Account connections">
+    <div class="conn-cell" data-svc="x" data-state="off" id="conn-x">
+      <span class="conn-icon" aria-hidden="true">𝕏</span>
+      <span class="conn-label">X</span>
+      <span class="conn-status" id="conn-x-status"></span>
+    </div>
+    <span class="conn-sep" aria-hidden="true">·</span>
+    <div class="conn-cell" data-svc="github" data-state="pending" id="conn-github">
+      <span class="conn-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-2.13c-3.2.7-3.88-1.37-3.88-1.37-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.69 1.25 3.35.95.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.17a10.95 10.95 0 0 1 5.74 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.07.78 2.16v3.2c0 .31.21.66.79.55 4.56-1.53 7.84-5.83 7.84-10.91C23.5 5.65 18.35.5 12 .5z"/></svg>
+      </span>
+      <span class="conn-label">GitHub</span>
+      <span class="conn-status" id="conn-github-status">Auto-connects on mint</span>
+    </div>
+  </section>
+
   <!-- ONE-BUTTON MINT: the express lane. Ultra-special — possibly the
        world's only one-click-to-X agent mint flow on the internet. -->
   <section class="quick-mint-section quick-mint-section--ultra" aria-labelledby="quick-mint-title">
@@ -4059,6 +4163,9 @@ function getActiveFlow() {
 }
 
 function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashboardUrl }) {
+  // Mint succeeded — extract the GH login from repoUrl and update the
+  // connections row so the user sees "GitHub · <login> ✓" from now on.
+  try { persistGhHandleFromRepo(repoUrl); } catch {}
   const safeRepo = (repoUrl && /^https:\/\/github\.com\//.test(repoUrl)) ? repoUrl : '';
   const safeDash = (dashboardUrl && /^https:\/\//.test(dashboardUrl)) ? dashboardUrl : '';
   const tweet = tweetText || '';
@@ -4362,6 +4469,53 @@ function wireMintButtons() {
   });
 }
 
+// === Connections row (X + GitHub OAuth status) ===
+function updateConnections() {
+  // X cell: drives off the existing AUTHED + window.__grokOwnerHandle.
+  const xCell = document.getElementById('conn-x');
+  const xStatus = document.getElementById('conn-x-status');
+  if (xCell && xStatus) {
+    if (AUTHED && SESSION_ID) {
+      xCell.dataset.state = 'on';
+      const handle = (window.__grokOwnerHandle || '').replace(/^@/, '') || 'connected';
+      xStatus.innerHTML = '@' + escapeHtmlBuilder(handle) +
+        ' <span class="conn-check" aria-hidden="true">✓</span>';
+    } else {
+      xCell.dataset.state = 'off';
+      xStatus.innerHTML = '<a href="' + WORKER_URL + '/auth/x/start" data-bypass-js="1">Sign in</a>';
+    }
+  }
+
+  // GitHub cell: from localStorage (set on mint success). GitHub handles
+  // do NOT take an @ prefix — just the bare login (e.g. AgentMindCloud).
+  const ghCell = document.getElementById('conn-github');
+  const ghStatus = document.getElementById('conn-github-status');
+  let ghHandle = null;
+  try { ghHandle = localStorage.getItem('ghHandle'); } catch { /* private mode */ }
+  if (ghCell && ghStatus) {
+    if (ghHandle) {
+      ghCell.dataset.state = 'on';
+      ghStatus.innerHTML = escapeHtmlBuilder(ghHandle) +
+        ' <span class="conn-check" aria-hidden="true">✓</span>';
+    } else {
+      ghCell.dataset.state = 'pending';
+      ghStatus.textContent = 'Auto-connects on mint';
+    }
+  }
+}
+
+// Persist the GH login when we learn it from a successful mint's repoUrl.
+// Called from showMintOverlay (sole entry point for mint success).
+function persistGhHandleFromRepo(repoUrl) {
+  if (typeof repoUrl !== 'string') return;
+  const m = repoUrl.match(/^https:\/\/github\.com\/([^\/?#]+)/i);
+  if (!m) return;
+  const owner = m[1];
+  if (!owner) return;
+  try { localStorage.setItem('ghHandle', owner); } catch { /* ignore */ }
+  if (typeof updateConnections === 'function') updateConnections();
+}
+
 // === One-Button Mint flow ===
 const QUICK_MINT_FLAG = 'quickMintPending';
 
@@ -4436,6 +4590,7 @@ async function runQuickMintFlow() {
       if (profile) window.__grokProfile = profile;
       if (r.ok && r.body && r.body.handle && !window.__grokOwnerHandle) {
         window.__grokOwnerHandle = r.body.handle;
+        try { updateConnections(); } catch {}
       }
     } catch { /* fall through with empty profile */ }
   }
@@ -4537,6 +4692,7 @@ async function runQuickMintFlow() {
   try { wireSignIn(); } catch {}
   try { wireMintButtons(); } catch {}
   try { wireQuickMint(); } catch {}
+  try { updateConnections(); } catch {}
   try { wireSidebarToggle(); } catch {}
   try {
     document.querySelectorAll('input[name="agent-name"]').forEach(el => {
@@ -4579,6 +4735,7 @@ async function runQuickMintFlow() {
       document.querySelectorAll('input[name="agent-handle"]').forEach(el => {
         el.value = r.handle || '';
       });
+      try { updateConnections(); } catch {}
     }
   } catch (e) { console.warn('profile init failed', e); }
 
