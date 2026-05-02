@@ -3984,6 +3984,20 @@ async function safeFetch(url, opts) {
     const retryAfter = retryAfterHeader ? Math.max(1, parseInt(retryAfterHeader, 10) || 60) : null;
     if (!res.ok) {
       console.warn('fetch failed', url, res.status, body);
+      // Auto-detect stale sessions: server says our session is gone but
+      // we still have one cached locally. Clear local state and reload so
+      // the user isn't stuck pretending to be signed in.
+      if (res.status === 401 && SESSION_ID && body && typeof body === 'object'
+          && /no valid session|session/i.test(body.error || '')) {
+        try {
+          localStorage.removeItem('grok_session_id');
+          localStorage.removeItem('grok_authed');
+          localStorage.removeItem('quickMintPending');
+          sessionStorage.setItem('grok_session_expired', '1');
+        } catch { /* private mode */ }
+        window.location.href = window.location.origin + window.location.pathname;
+        throw new Error('Session expired');
+      }
       return { ok: false, status: res.status, body, retryAfter };
     }
     return { ok: true, status: res.status, body, retryAfter };
@@ -4486,7 +4500,10 @@ function updateConnections() {
       xCell.dataset.state = 'on';
       const handle = (window.__grokOwnerHandle || '').replace(/^@/, '') || 'connected';
       xStatus.innerHTML = '@' + escapeHtmlBuilder(handle) +
-        ' <span class="conn-check" aria-hidden="true">✓</span>';
+        ' <span class="conn-check" aria-hidden="true">✓</span>' +
+        ' · <a href="#" id="conn-x-signout" style="color:#9ca3af;text-decoration:underline;cursor:pointer;">Sign out</a>';
+      const signOutLink = document.getElementById('conn-x-signout');
+      if (signOutLink) signOutLink.addEventListener('click', (e) => { e.preventDefault(); signOut(); });
     } else {
       xCell.dataset.state = 'off';
       xStatus.innerHTML = '<a href="' + WORKER_URL + '/auth/x/start" data-bypass-js="1">Sign in</a>';
@@ -4509,6 +4526,28 @@ function updateConnections() {
       ghStatus.textContent = 'Auto-connects on mint';
     }
   }
+}
+
+// Sign the user out: tell the worker to drop the KV session, clear all
+// local auth state, and reload to a clean URL so we don't auto-reauth
+// from a leftover ?session= query param.
+async function signOut() {
+  if (SESSION_ID) {
+    try {
+      await fetch(WORKER_URL + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: SESSION_ID }),
+      });
+    } catch { /* worker session will TTL out anyway */ }
+  }
+  try {
+    localStorage.removeItem('grok_session_id');
+    localStorage.removeItem('grok_authed');
+    localStorage.removeItem('ghHandle');
+    localStorage.removeItem('quickMintPending');
+  } catch { /* private mode */ }
+  window.location.href = window.location.origin + window.location.pathname;
 }
 
 // Persist the GH login when we learn it from a successful mint's repoUrl.
@@ -4698,6 +4737,22 @@ async function runQuickMintFlow() {
 }
 
 (async function init() {
+  // If we just auto-signed-out due to a stale session, surface a notice
+  // so the user knows why they're back at the sign-in state.
+  try {
+    if (sessionStorage.getItem('grok_session_expired') === '1') {
+      sessionStorage.removeItem('grok_session_expired');
+      setTimeout(() => {
+        if (typeof showMintError === 'function') {
+          showMintError({
+            status: 401,
+            body: { error: 'Your sign-in expired. Please sign in again.' },
+            retry: null,
+          });
+        }
+      }, 200);
+    }
+  } catch { /* private mode */ }
   // Synchronous up-front: bind ALL handlers and reflect AUTHED state
   // immediately. The user can interact (sign in, switch tabs, click mint)
   // before any async fetch completes.
