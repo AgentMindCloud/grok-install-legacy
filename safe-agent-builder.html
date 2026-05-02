@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="worker-url" content="https://grok-install-api.jani-starck2.workers.dev">
+<meta name="worker-url" content="https://grok-install.jani-starck2.workers.dev">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>grok-install — Build a Safe AI Agent in 60 seconds</title>
 <meta name="description" content="Build a safe AI agent that lives on X. Mint your agent in 60 seconds — 100% yours, Apache 2.0, billed via your xAI credits.">
@@ -3288,7 +3288,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <div class="dna-overlay" role="dialog" aria-label="Sign in to see your Voice DNA">
             <h3>Sign in with X to see your Voice DNA</h3>
             <p>We read your bio and recent posts to extract your voice traits, domains, and vibe — then mirror them in your agent. Read-only access. No posts on your behalf, ever.</p>
-            <a class="btn-signin-overlay btn-signin" href="https://grok-install-api.jani-starck2.workers.dev/auth/x/start" data-bypass-js="1">Sign in with X (read-only)</a>
+            <a class="btn-signin-overlay btn-signin" href="https://grok-install.jani-starck2.workers.dev/auth/x/start" data-bypass-js="1">Sign in with X (read-only)</a>
             <p style="font-size: 11px; color: var(--text-faint); font-family: var(--mono);">The card below is a placeholder until you sign in.</p>
           </div>
           <div class="dna-header">
@@ -3948,7 +3948,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 
 <script>
 // === grok-install Worker wiring (injected by Phase 8) ===
-const WORKER_URL = "https://grok-install-api.jani-starck2.workers.dev";
+const WORKER_URL = "https://grok-install.jani-starck2.workers.dev";
 
 const _qs = new URLSearchParams(window.location.search);
 const _qsSession = _qs.get('session');
@@ -4262,10 +4262,11 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashbo
   }
 
   const copyTweetBtn = document.getElementById('mint-copy-tweet');
-  copyTweetBtn.addEventListener('click', () => copyTo(copyTweetBtn, tweet, 'Copy tweet', 'mint-tweet-text'));
+  if (copyTweetBtn) copyTweetBtn.addEventListener('click', () => copyTo(copyTweetBtn, tweet, 'Copy tweet', 'mint-tweet-text'));
   const copyCommentBtn = document.getElementById('mint-copy-comment');
-  copyCommentBtn.addEventListener('click', () => copyTo(copyCommentBtn, comment, 'Copy install comment', 'mint-install-text'));
-  document.getElementById('mint-close').addEventListener('click', close);
+  if (copyCommentBtn) copyCommentBtn.addEventListener('click', () => copyTo(copyCommentBtn, comment, 'Copy install comment', 'mint-install-text'));
+  const mintCloseBtn = document.getElementById('mint-close');
+  if (mintCloseBtn) mintCloseBtn.addEventListener('click', close);
 
   const initial = document.getElementById('mint-intent') || copyTweetBtn;
   if (initial) initial.focus();
@@ -4295,6 +4296,7 @@ function showMintCountdownOverlay({ seconds, retry }) {
   const retryCounter = overlay.querySelector('#mc-retry-counter');
   const retryBtn = overlay.querySelector('#mc-retry');
   const bar = overlay.querySelector('#mc-bar');
+  if (!counter || !retryCounter || !retryBtn || !bar) return;
   const tick = setInterval(() => {
     remaining -= 1;
     if (remaining <= 0) {
@@ -4321,7 +4323,8 @@ function showMintCountdownOverlay({ seconds, retry }) {
   }
   function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(); } }
   document.addEventListener('keydown', onKey);
-  overlay.querySelector('#mc-close').addEventListener('click', close);
+  const mcCloseBtn = overlay.querySelector('#mc-close');
+  if (mcCloseBtn) mcCloseBtn.addEventListener('click', close);
   retryBtn.addEventListener('click', () => {
     if (retryBtn.disabled) return;
     close();
@@ -4368,12 +4371,16 @@ function showMintError({ status, body, retry, retryAfter }) {
   function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(); } }
   document.addEventListener('keydown', onKey);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-  document.getElementById('me-close').addEventListener('click', close);
+  const meCloseBtn = document.getElementById('me-close');
+  if (meCloseBtn) meCloseBtn.addEventListener('click', close);
   if (retry) {
-    document.getElementById('me-retry').addEventListener('click', () => { close(); retry(); });
-    document.getElementById('me-retry').focus();
-  } else {
-    document.getElementById('me-close').focus();
+    const meRetryBtn = document.getElementById('me-retry');
+    if (meRetryBtn) {
+      meRetryBtn.addEventListener('click', () => { close(); retry(); });
+      meRetryBtn.focus();
+    }
+  } else if (meCloseBtn) {
+    meCloseBtn.focus();
   }
 }
 
@@ -4599,7 +4606,7 @@ async function runQuickMintFlow() {
 
   // Step 3: pick a mascot at random from the 8 styles.
   setQmStep('mascot', 'active');
-  const mascotStyles = ['cyberpunk_neon','retro_pixel','liquid_gold','crystal_glass','spectrum_glitch','linework_ink','specimen_plate','terra_glyph'];
+  const mascotStyles = Object.keys(MASCOT_GRADIENTS);
   const mascotStyle = mascotStyles[Math.floor(Math.random() * mascotStyles.length)];
   await qmWait(520);
   setQmStep('mascot', 'done');
@@ -4656,6 +4663,9 @@ async function runQuickMintFlow() {
     setQmStep('mint', 'error');
     setTimeout(closeCheckingOverlay, 1500);
     try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
+    if (typeof showMintError === 'function') {
+      showMintError({ status: 0, body: { error: e && e.message ? e.message : 'Network error' }, retry: () => runQuickMintFlow() });
+    }
     return;
   }
 
@@ -4682,7 +4692,9 @@ async function runQuickMintFlow() {
   setQmStep('mint', 'error');
   setTimeout(closeCheckingOverlay, 1600);
   try { localStorage.removeItem(QUICK_MINT_FLAG); } catch {}
-  if (typeof showMintError === 'function') showMintError(r);
+  if (typeof showMintError === 'function') {
+    showMintError({ status: r.status, body: r.body, retry: () => runQuickMintFlow(), retryAfter: r.retryAfter });
+  }
 }
 
 (async function init() {
@@ -4998,6 +5010,7 @@ const TESTER = {
 
   renderThread() {
     const el = document.getElementById('lt-thread');
+    if (!el) return;
     if (this.thread.length === 0) {
       el.innerHTML = '<div class="lt-empty">Send a message to start the conversation. Your agent replies in your voice.<br>Nothing posts to X — this is a private dry run.</div>';
       return;
@@ -5029,6 +5042,7 @@ const TESTER = {
       domains[1] ? ('A friend asks for advice about ' + domains[1] + ' — what do you say?') : 'Sum up your point of view in one sentence',
     ];
     const el = document.getElementById('lt-suggestions');
+    if (!el) return;
     el.innerHTML = (this.thread.length === 0)
       ? sugs.map(s => '<button class="lt-sug" type="button" data-sug="' + escapeHtmlBuilder(s).replace(/"/g, '&quot;') + '">' + escapeHtmlBuilder(s) + '</button>').join('')
       : '';

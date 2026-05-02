@@ -1,4 +1,4 @@
-name = "grok-install-api"
+name = "grok-install"
 main = "worker/src/index.js"
 compatibility_date = "2026-04-28"
 compatibility_flags = ["nodejs_compat"]
