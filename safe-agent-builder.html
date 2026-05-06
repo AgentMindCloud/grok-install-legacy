@@ -3994,8 +3994,10 @@ async function safeFetch(url, opts) {
           localStorage.removeItem('grok_authed');
           localStorage.removeItem('quickMintPending');
           sessionStorage.setItem('grok_session_expired', '1');
-        } catch { /* private mode */ }
-        window.location.href = window.location.origin + window.location.pathname;
+        } catch {}
+        if (SESSION_ID) {
+          window.location.href = window.location.origin + window.location.pathname;
+        }
         throw new Error('Session expired');
       }
       return { ok: false, status: res.status, body, retryAfter };
@@ -5255,11 +5257,23 @@ function wireLiveTester() {
       tempValue.textContent = TESTER.temperature.toFixed(1);
     });
   }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !panel.hidden) TESTER.close();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) TESTER.close();
   });
 }
 
+// === Boot sequence - fixes sign-in + Voice DNA loading ===
+document.addEventListener('DOMContentLoaded', () => {
+  wireSignIn();
+  loadStats().catch(() => {});
+  loadProfileIfAuthed().catch(() => {});
+  try { sessionStorage.removeItem('grok_session_expired'); } catch {}
+});
+
+// Make sure wireSignIn runs even if DOMContentLoaded already fired
+try { wireSignIn(); } catch {}
+
+// Original live tester call
 try { wireLiveTester(); } catch {}
 </script>
 
@@ -5278,6 +5292,5 @@ try { wireLiveTester(); } catch {}
     <div class="cm-foot">No data leaves your device until you authorise each step.</div>
   </div>
 </div>
-
 </body>
 </html>
