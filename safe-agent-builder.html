@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="worker-url" content="https://grok-install.jani-starck2.workers.dev">
+<script src="assets/grok-utils.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>grok-install — Build a Safe AI Agent in 60 seconds</title>
 <meta name="description" content="Build a safe AI agent that lives on X. Mint your agent in 60 seconds — 100% yours, Apache 2.0, billed via your xAI credits.">
@@ -3288,7 +3289,7 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
           <div class="dna-overlay" role="dialog" aria-label="Sign in to see your Voice DNA">
             <h3>Sign in with X to see your Voice DNA</h3>
             <p>We read your bio and recent posts to extract your voice traits, domains, and vibe — then mirror them in your agent. Read-only access. No posts on your behalf, ever.</p>
-            <a class="btn-signin-overlay btn-signin" href="https://grok-install.jani-starck2.workers.dev/auth/x/start" data-bypass-js="1">Sign in with X (read-only)</a>
+            <a class="btn-signin-overlay btn-signin" href="https://grok-install.jani-starck2.workers.dev/auth/x/start" data-signin-href="/auth/x/start" data-bypass-js="1">Sign in with X (read-only)</a>
             <p style="font-size: 11px; color: var(--text-faint); font-family: var(--mono);">The card below is a placeholder until you sign in.</p>
           </div>
           <div class="dna-header">
@@ -3948,7 +3949,17 @@ footer a:hover { color: var(--green-bright); text-decoration: underline; }
 
 <script>
 // === grok-install Worker wiring (injected by Phase 8) ===
-const WORKER_URL = "https://grok-install.jani-starck2.workers.dev";
+// WORKER_URL is read from <meta name="worker-url"> so the meta tag is the
+// single source of truth across the page (no JS const drift).
+const WORKER_URL = getWorkerUrl();
+
+// Rewrite any <a data-signin-href="..."> anchors to use WORKER_URL on boot.
+// The hardcoded href stays in the markup as a no-JS fallback only.
+try {
+  document.querySelectorAll('a[data-signin-href]').forEach(a => {
+    a.href = WORKER_URL + a.dataset.signinHref;
+  });
+} catch (e) {}
 
 const _qs = new URLSearchParams(window.location.search);
 const _qsSession = _qs.get('session');
@@ -3970,9 +3981,26 @@ try {
   if (!AUTHED) AUTHED = localStorage.getItem('grok_authed') === '1';
 } catch { /* nothing else to do */ }
 
-async function safeFetch(url, opts) {
+// Strip auth query params from URL so they don't leak via shares/back-nav.
+if (_qsSession || _qs.get('authed')) {
   try {
-    const res = await fetch(url, opts);
+    const _url = new URL(window.location.href);
+    _url.searchParams.delete('session');
+    _url.searchParams.delete('authed');
+    history.replaceState(null, '', _url.toString());
+  } catch {}
+}
+
+async function safeFetch(url, opts) {
+  // Always send X-Session-Id when we have a session, regardless of caller.
+  // Worker prefers the header; query-param ?session= remains supported as
+  // backward-compat for callers that build URLs with it.
+  const o = opts ? Object.assign({}, opts) : {};
+  if (SESSION_ID) {
+    o.headers = Object.assign({}, o.headers || {}, { 'X-Session-Id': SESSION_ID });
+  }
+  try {
+    const res = await fetch(url, o);
     const ct = res.headers.get('content-type') || '';
     let body = null;
     if (ct.includes('application/json')) {
@@ -3984,20 +4012,13 @@ async function safeFetch(url, opts) {
     const retryAfter = retryAfterHeader ? Math.max(1, parseInt(retryAfterHeader, 10) || 60) : null;
     if (!res.ok) {
       console.warn('fetch failed', url, res.status, body);
-      // Auto-detect stale sessions: server says our session is gone but
-      // we still have one cached locally. Clear local state and reload so
-      // the user isn't stuck pretending to be signed in.
-      if (res.status === 401 && SESSION_ID && body && typeof body === 'object'
-          && /no valid session|session/i.test(body.error || '')) {
-        try {
-          localStorage.removeItem('grok_session_id');
-          localStorage.removeItem('grok_authed');
-          localStorage.removeItem('quickMintPending');
-          sessionStorage.setItem('grok_session_expired', '1');
-        } catch {}
-        if (SESSION_ID) {
-          window.location.href = window.location.origin + window.location.pathname;
-        }
+      // Auto-clear stale session on ANY 401 when SESSION_ID is set, regardless
+      // of error-message format. Previous regex-gated check missed non-matching
+      // bodies and left stale state behind.
+      if (res.status === 401 && SESSION_ID) {
+        clearAuthLocalState();
+        try { sessionStorage.setItem('grok_session_expired', '1'); } catch {}
+        window.location.href = window.location.origin + window.location.pathname;
         throw new Error('Session expired');
       }
       return { ok: false, status: res.status, body, retryAfter };
@@ -4059,15 +4080,15 @@ const MASCOT_GRADIENTS = {
 };
 
 function wallCardHtml(item) {
-  const name = escapeHtmlBuilder(item.agentName || item.name || 'Agent');
-  const handle = escapeHtmlBuilder(item.agentHandle || item.handle || '');
-  const genesisId = escapeHtmlBuilder(item.genesisId || '');
+  const name = escapeHtml(item.agentName || item.name || 'Agent');
+  const handle = escapeHtml(item.agentHandle || item.handle || '');
+  const genesisId = escapeHtml(item.genesisId || '');
   const initial = (name || 'A').slice(0, 1).toUpperCase();
   const gradient = MASCOT_GRADIENTS[item.mascotStyle] || MASCOT_GRADIENTS.specimen_plate;
   const mark = item.mascotUrl
-    ? `<img src="${escapeHtmlBuilder(item.mascotUrl)}" alt="" loading="lazy">`
+    ? `<img src="${escapeHtml(item.mascotUrl)}" alt="" loading="lazy">`
     : initial;
-  const href = item.repoUrl ? escapeHtmlBuilder(item.repoUrl) : '#';
+  const href = item.repoUrl ? escapeHtml(item.repoUrl) : '#';
   const featured = item.featured ? '<span class="wall-card-featured-tag">demo seed</span>' : '';
   const featuredClass = item.featured ? ' featured' : '';
   return `<a class="wall-card${featuredClass}" href="${href}" target="_blank" rel="noopener" aria-label="${name} on the wall">
@@ -4114,17 +4135,17 @@ function updateDnaCard(profile, handle) {
   const traitGroups = document.querySelectorAll('.dna-traits');
   if (traitGroups[0]) {
     traitGroups[0].innerHTML = (profile.voice_traits || [])
-      .map((t, i) => '<span class="dna-trait" style="animation-delay: ' + (0.05 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
+      .map((t, i) => '<span class="dna-trait" style="animation-delay: ' + (0.05 + i * 0.05) + 's;">' + escapeHtml(t) + '</span>')
       .join('');
   }
   if (traitGroups[1]) {
     traitGroups[1].innerHTML = (profile.domains || [])
-      .map((t, i) => '<span class="dna-trait cyan" style="animation-delay: ' + (0.3 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
+      .map((t, i) => '<span class="dna-trait cyan" style="animation-delay: ' + (0.3 + i * 0.05) + 's;">' + escapeHtml(t) + '</span>')
       .join('');
   }
   if (traitGroups[2]) {
     traitGroups[2].innerHTML = (profile.vibe || [])
-      .map((t, i) => '<span class="dna-trait green" style="animation-delay: ' + (0.5 + i * 0.05) + 's;">' + escapeHtmlBuilder(t) + '</span>')
+      .map((t, i) => '<span class="dna-trait green" style="animation-delay: ' + (0.5 + i * 0.05) + 's;">' + escapeHtml(t) + '</span>')
       .join('');
   }
   // Reset signal-flow agent-name placeholder when a different handle signs in
@@ -4138,12 +4159,6 @@ function updateDnaCard(profile, handle) {
   }
 }
 
-function escapeHtmlBuilder(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 async function loadProfileIfAuthed() {
   if (!(AUTHED && SESSION_ID)) return;
   const r = await safeFetch(WORKER_URL + '/api/analyze-profile', {
@@ -4152,9 +4167,15 @@ async function loadProfileIfAuthed() {
     body: JSON.stringify({ sessionId: SESSION_ID }),
   });
   if (!r.ok || !r.body) return;
+  window.__grokProfile = r.body.profile;
+  window.__grokOwnerHandle = r.body.handle;
   updateDnaCard(r.body.profile, r.body.handle);
   const sample = document.querySelector('.dna-sample');
   if (sample && r.body.sample_reply) sample.textContent = r.body.sample_reply;
+  document.querySelectorAll('input[name="agent-handle"]').forEach(el => {
+    el.value = r.body.handle || '';
+  });
+  try { updateConnections(); } catch {}
 }
 
 function getSelectedMascotStyle() {
@@ -4188,10 +4209,6 @@ function showMintOverlay({ genesisId, repoUrl, tweetText, installComment, dashbo
   const comment = installComment || '@grok install this';
   const intentUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweet);
   const previousFocus = document.activeElement;
-
-  function escapeHtml(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
 
   const overlay = document.createElement('div');
   overlay.setAttribute('role', 'dialog');
@@ -4312,7 +4329,23 @@ function showMintCountdownOverlay({ seconds, retry }) {
   const retryCounter = overlay.querySelector('#mc-retry-counter');
   const retryBtn = overlay.querySelector('#mc-retry');
   const bar = overlay.querySelector('#mc-bar');
-  if (!counter || !retryCounter || !retryBtn || !bar) return;
+  if (!counter || !retryCounter || !retryBtn || !bar) {
+    // Markup integrity broken — surface a visible error rather than silently
+    // freezing the overlay at "0 s" with no recovery path.
+    console.warn('showMintCountdownOverlay: required overlay elements missing');
+    overlay.innerHTML =
+      '<div role="alert" style="background:#0f141c;border:1px solid rgba(239,68,68,0.4);border-radius:14px;padding:24px;max-width:420px;color:#e8ecf2;font-family:Inter,system-ui,sans-serif;text-align:center;">' +
+      '<h3 style="color:#ef4444;font-size:18px;margin:0 0 8px;">Couldn\'t show countdown</h3>' +
+      '<p style="color:#9ca3af;font-size:14px;margin:0 0 16px;">Wait about a minute and try minting again.</p>' +
+      '<button id="mc-fallback-close" type="button" style="padding:10px 18px;background:#151b26;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#e8ecf2;cursor:pointer;">Close</button>' +
+      '</div>';
+    const closeBtn = overlay.querySelector('#mc-fallback-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => {
+      overlay.remove();
+      if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+    });
+    return;
+  }
   const tick = setInterval(() => {
     remaining -= 1;
     if (remaining <= 0) {
@@ -4501,7 +4534,7 @@ function updateConnections() {
     if (AUTHED && SESSION_ID) {
       xCell.dataset.state = 'on';
       const handle = (window.__grokOwnerHandle || '').replace(/^@/, '') || 'connected';
-      xStatus.innerHTML = '@' + escapeHtmlBuilder(handle) +
+      xStatus.innerHTML = '@' + escapeHtml(handle) +
         ' <span class="conn-check" aria-hidden="true">✓</span>' +
         ' · <a href="#" id="conn-x-signout" style="color:#9ca3af;text-decoration:underline;cursor:pointer;">Sign out</a>';
       const signOutLink = document.getElementById('conn-x-signout');
@@ -4521,7 +4554,7 @@ function updateConnections() {
   if (ghCell && ghStatus) {
     if (ghHandle) {
       ghCell.dataset.state = 'on';
-      ghStatus.innerHTML = escapeHtmlBuilder(ghHandle) +
+      ghStatus.innerHTML = escapeHtml(ghHandle) +
         ' <span class="conn-check" aria-hidden="true">✓</span>';
     } else {
       ghCell.dataset.state = 'pending';
@@ -4543,12 +4576,7 @@ async function signOut() {
       });
     } catch { /* worker session will TTL out anyway */ }
   }
-  try {
-    localStorage.removeItem('grok_session_id');
-    localStorage.removeItem('grok_authed');
-    localStorage.removeItem('ghHandle');
-    localStorage.removeItem('quickMintPending');
-  } catch { /* private mode */ }
+  clearAuthLocalState();
   window.location.href = window.location.origin + window.location.pathname;
 }
 
@@ -4785,28 +4813,7 @@ async function runQuickMintFlow() {
 
   try { await loadStats(); } catch {}
   try { await loadWall(); } catch {}
-  try {
-    const r = await (async () => {
-      if (!(AUTHED && SESSION_ID)) return null;
-      const res = await safeFetch(WORKER_URL + '/api/analyze-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: SESSION_ID }),
-      });
-      return res.ok ? res.body : null;
-    })();
-    if (r) {
-      window.__grokProfile = r.profile;
-      window.__grokOwnerHandle = r.handle;
-      updateDnaCard(r.profile, r.handle);
-      const sample = document.querySelector('.dna-sample');
-      if (sample && r.sample_reply) sample.textContent = r.sample_reply;
-      document.querySelectorAll('input[name="agent-handle"]').forEach(el => {
-        el.value = r.handle || '';
-      });
-      try { updateConnections(); } catch {}
-    }
-  } catch (e) { console.warn('profile init failed', e); }
+  try { await loadProfileIfAuthed(); } catch (e) { console.warn('profile init failed', e); }
 
   // Auto-resume quick-mint after X / GitHub OAuth round-trip.
   try {
@@ -4840,14 +4847,16 @@ async function runQuickMintFlow() {
 
 // Floating particles
 const particles = document.getElementById('particles');
-for (let i = 0; i < 20; i++) {
-  const p = document.createElement('div');
-  p.className = 'particle';
-  p.style.left = Math.random() * 100 + 'vw';
-  p.style.bottom = '-10px';
-  p.style.animationDuration = (12 + Math.random() * 18) + 's';
-  p.style.animationDelay = Math.random() * 16 + 's';
-  particles.appendChild(p);
+if (particles) {
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.bottom = '-10px';
+    p.style.animationDuration = (12 + Math.random() * 18) + 's';
+    p.style.animationDelay = Math.random() * 16 + 's';
+    particles.appendChild(p);
+  }
 }
 
 // Path tab switching + user-flow diagram step 1 awareness
@@ -4875,7 +4884,8 @@ document.querySelectorAll('.path-tab').forEach(tab => {
       panel.classList.toggle('active', panel.dataset.flow === target);
     });
     syncUserFlowStep1(target);
-    window.scrollTo({ top: document.querySelector('.path-tabs').offsetTop - 20, behavior: 'smooth' });
+    const tabs = document.querySelector('.path-tabs');
+    if (tabs) window.scrollTo({ top: tabs.offsetTop - 20, behavior: 'smooth' });
   });
 });
 // Initialize step 1 copy from the initially-active tab
@@ -5026,15 +5036,19 @@ const TESTER = {
       return;
     }
     const panel = document.getElementById('live-tester-panel');
+    if (!panel) return;
     panel.hidden = false;
     requestAnimationFrame(() => panel.classList.add('open'));
     document.body.style.overflow = 'hidden';
     const titleEl = document.getElementById('lt-title');
     const name = (document.querySelector('input[name="agent-name"]') || {}).value || 'your agent';
-    titleEl.textContent = 'Chat with ' + name;
+    if (titleEl) titleEl.textContent = 'Chat with ' + name;
     this.loadThread();
     this.renderSuggestions();
-    setTimeout(() => { try { document.getElementById('lt-input').focus(); } catch {} }, 280);
+    setTimeout(() => {
+      const input = document.getElementById('lt-input');
+      if (input) { try { input.focus(); } catch {} }
+    }, 280);
   },
 
   close() {
@@ -5082,7 +5096,7 @@ const TESTER = {
       const bubbleCls = isThinking ? 'lt-bubble lt-thinking' : 'lt-bubble';
       const text = isThinking ? 'thinking…' : m.content;
       const showRegen = m.role === 'assistant' && i === lastAssistant && !isThinking;
-      const inner = '<div class="' + bubbleCls + '">' + escapeHtmlBuilder(text) + '</div>'
+      const inner = '<div class="' + bubbleCls + '">' + escapeHtml(text) + '</div>'
         + (showRegen ? '<button class="lt-regen" type="button" aria-label="Regenerate this reply" data-action="regen">↻</button>' : '');
       const wrap = m.role === 'assistant' ? '<div class="lt-bubble-wrap">' + inner + '</div>' : inner;
       return '<div class="' + cls + '">' + wrap + '</div>';
@@ -5101,7 +5115,7 @@ const TESTER = {
     const el = document.getElementById('lt-suggestions');
     if (!el) return;
     el.innerHTML = (this.thread.length === 0)
-      ? sugs.map(s => '<button class="lt-sug" type="button" data-sug="' + escapeHtmlBuilder(s).replace(/"/g, '&quot;') + '">' + escapeHtmlBuilder(s) + '</button>').join('')
+      ? sugs.map(s => '<button class="lt-sug" type="button" data-sug="' + escapeHtml(s).replace(/"/g, '&quot;') + '">' + escapeHtml(s) + '</button>').join('')
       : '';
   },
 
@@ -5109,12 +5123,15 @@ const TESTER = {
     const text = (userText || '').trim();
     if (!text || this.busy) return;
     this.busy = true;
-    document.getElementById('lt-send').disabled = true;
+    const sendBtn = document.getElementById('lt-send');
+    if (sendBtn) sendBtn.disabled = true;
     this.thread.push({ role: 'user', content: text });
     this.thread.push({ role: 'assistant', content: '...' });
     this.renderThread();
-    document.getElementById('lt-input').value = '';
-    document.getElementById('lt-suggestions').innerHTML = '';
+    const inputEl = document.getElementById('lt-input');
+    if (inputEl) inputEl.value = '';
+    const sugsEl = document.getElementById('lt-suggestions');
+    if (sugsEl) sugsEl.innerHTML = '';
 
     const profile = window.__grokProfile || {};
     const nameField = document.querySelector('input[name="agent-name"]');
@@ -5164,10 +5181,12 @@ const TESTER = {
       this.thread[this.thread.length - 1] = { role: 'assistant', content: '[Network error]' };
     } finally {
       this.busy = false;
-      document.getElementById('lt-send').disabled = false;
+      const sendBtn2 = document.getElementById('lt-send');
+      if (sendBtn2) sendBtn2.disabled = false;
       this.renderThread();
       this.persist();
-      try { document.getElementById('lt-input').focus(); } catch {}
+      const input2 = document.getElementById('lt-input');
+      if (input2) { try { input2.focus(); } catch {} }
     }
   },
 
@@ -5257,23 +5276,15 @@ function wireLiveTester() {
       tempValue.textContent = TESTER.temperature.toFixed(1);
     });
   }
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) TESTER.close();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) TESTER.close();
   });
 }
 
-// === Boot sequence - fixes sign-in + Voice DNA loading ===
-document.addEventListener('DOMContentLoaded', () => {
-  wireSignIn();
-  loadStats().catch(() => {});
-  loadProfileIfAuthed().catch(() => {});
-  try { sessionStorage.removeItem('grok_session_expired'); } catch {}
-});
-
-// Make sure wireSignIn runs even if DOMContentLoaded already fired
-try { wireSignIn(); } catch {}
-
-// Original live tester call
+// Wire the live tester. Defined in this script block, must run after the
+// TESTER object literal above. wireSignIn / loadStats / loadProfileIfAuthed
+// are owned by the IIFE init in the previous script block — do NOT re-call
+// them here (it would attach duplicate click listeners and double-fetch).
 try { wireLiveTester(); } catch {}
 </script>
 

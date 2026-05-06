@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="worker-url" content="https://grok-install.jani-starck2.workers.dev">
+<script src="assets/grok-utils.js"></script>
 <title>grok-install — Owner dashboard</title>
 <meta name="description" content="Manage your minted grok-install agents. Limits, memory, settings, and history — all under your X handle.">
 <meta property="og:type" content="website">
@@ -1080,10 +1081,32 @@ aside.sidebar {
 
 <script>
 // === grok-install dashboard ===
-const WORKER_URL = "https://grok-install.jani-starck2.workers.dev";
+const WORKER_URL = getWorkerUrl();
 
 const _qs = new URLSearchParams(window.location.search);
-const SESSION_ID = _qs.get('session');
+const _qsSession = _qs.get('session');
+const _qsAuthed = _qs.get('authed') === '1';
+
+// Persist newly-arrived session so reloads/bookmarks keep auth.
+try {
+  if (_qsSession) localStorage.setItem('grok_session_id', _qsSession);
+  if (_qsAuthed) localStorage.setItem('grok_authed', '1');
+} catch (e) { /* private mode */ }
+
+let SESSION_ID = _qsSession;
+try {
+  if (!SESSION_ID) SESSION_ID = localStorage.getItem('grok_session_id') || null;
+} catch (e) { /* nothing else to do */ }
+
+// Strip auth query params from URL so they don't leak via shares/back-nav.
+if (_qsSession || _qs.get('authed')) {
+  try {
+    const _url = new URL(window.location.href);
+    _url.searchParams.delete('session');
+    _url.searchParams.delete('authed');
+    history.replaceState(null, '', _url.toString());
+  } catch (e) {}
+}
 
 let CURRENT_AGENT = null;
 let AGENTS = [];
@@ -1092,11 +1115,6 @@ let CURRENT_PERIOD = '7d';
 // ---------- Utilities ----------
 function $(sel, ctx) { return (ctx || document).querySelector(sel); }
 function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
-function escapeHtml(s) {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 function fmtNumber(n) {
   if (n == null) return '—';
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
@@ -1119,13 +1137,22 @@ function fmtDate(iso) {
 
 let _sessionExpiredNotified = false;
 async function safeFetch(url, opts) {
+  // Always include X-Session-Id when we have a session, regardless of caller.
+  // Query-param transport (?session=) is still supported by withSession() for
+  // backward compat with existing callsites; the worker prefers the header.
+  const o = opts ? Object.assign({}, opts) : {};
+  if (SESSION_ID) {
+    o.headers = Object.assign({}, o.headers || {}, { 'X-Session-Id': SESSION_ID });
+  }
   try {
-    const res = await fetch(url, opts);
+    const res = await fetch(url, o);
     if (!res.ok) {
       let body = null;
       try { body = await res.json(); } catch {}
       if (res.status === 401 && !_sessionExpiredNotified) {
         _sessionExpiredNotified = true;
+        clearAuthLocalState();
+        try { sessionStorage.setItem('grok_session_expired', '1'); } catch {}
         toast('Session expired — please sign in again.', 'error');
         setTimeout(() => {
           window.location.href = WORKER_URL + '/auth/x/start?return=dashboard';
@@ -1284,18 +1311,21 @@ function wireSidebar() {
 
 // ---------- Sign out ----------
 function wireSignOut() {
-  $('#signout-btn').addEventListener('click', async (e) => {
+  const btn = $('#signout-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async (e) => {
     e.preventDefault();
     sessionStorage.removeItem('grok_agent');
     if (SESSION_ID) {
       try {
         await fetch(WORKER_URL + '/auth/logout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-Session-Id': SESSION_ID },
           body: JSON.stringify({ sessionId: SESSION_ID }),
         });
       } catch (err) { console.warn('logout fetch failed', err); }
     }
+    clearAuthLocalState();
     window.location.href = '/safe-agent-builder.html';
   });
 }

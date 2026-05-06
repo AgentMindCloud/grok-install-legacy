@@ -14,6 +14,8 @@
   <link rel="mask-icon" href="assets/favicon.svg" color="#00F0FF">
   <link rel="apple-touch-icon" href="assets/favicon.svg">
 
+  <script src="assets/grok-utils.js"></script>
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="grok-install">
   <meta property="og:url" content="https://agentmindcloud.github.io/grok-install/">
@@ -1086,12 +1088,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
           try { localStorage.setItem(CACHE, JSON.stringify({ ts: Date.now(), data: data })); } catch (e) {}
         }
 
-        function escapeHtml(s) {
-          return String(s).replace(/[&<>"']/g, function (c) {
-            return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
-          });
-        }
-
         function fmtDelta(pct) {
           var sign = pct > 0 ? '+' : (pct < 0 ? '' : '±');
           return sign + (Math.round(pct * 10) / 10) + '%';
@@ -1302,12 +1298,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
       if (profile === 'strict')   return { color: '#00FFA3', label: 'Strict safety' };
       if (profile === 'moderate') return { color: '#FFB800', label: 'Moderate safety' };
       return { color: '#FF3366', label: 'Custom safety' };
-    }
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
-      });
     }
 
     window.renderAgentCard = function renderAgentCard(a) {
@@ -1848,12 +1838,6 @@ BLOCKED = [<span style="color:#00FFA3;">"deepfake"</span>, <span style="color:#0
     function fetchSchema() {
       return fetch('./schemas/grok-install-v2.13.schema.json', { cache: 'force-cache' })
         .then(function (r) { if (!r.ok) throw new Error('schema fetch failed'); return r.json(); });
-    }
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
-      });
     }
 
     function renderSuccess(doc) {

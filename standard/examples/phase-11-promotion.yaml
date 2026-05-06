@@ -1,3 +1,6 @@
+# Historical v2.12 fixture — intentionally not v2.14 conformant by design.
+# Do not validate this file against the current schema.
+#
 # Phase 11 — minimal Passive Growth Engine example.
 # Shows the smallest useful grok-install.yaml that opts in to every
 # passive-growth surface (auto-welcome, share cards, weekly highlight thread,

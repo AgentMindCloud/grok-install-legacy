@@ -13,6 +13,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="apple-touch-icon" href="assets/favicon.svg">
 
+  <script src="assets/grok-utils.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -401,11 +403,6 @@
     function save() { try { localStorage.setItem(KEY, JSON.stringify(state.agents)); } catch (e) {} }
 
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
-      });
-    }
 
     function toast(msg, color) {
       toastEl.textContent = msg;
