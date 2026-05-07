@@ -1,78 +1,157 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="grok-install — the universal standard for Grok-native agents">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="grok-install — mint personalized AI agents on X">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A0A0F"/>
-      <stop offset="100%" stop-color="#13131A"/>
+    <!-- Spectral palette -->
+    <linearGradient id="spectralGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF1E70"/>
+      <stop offset="50%" stop-color="#C2369F"/>
+      <stop offset="100%" stop-color="#00E0D5"/>
     </linearGradient>
-    <linearGradient id="text" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00F0FF"/>
-      <stop offset="60%" stop-color="#7C3AED"/>
-    </linearGradient>
-    <radialGradient id="halo" cx="50%" cy="40%" r="55%">
-      <stop offset="0%" stop-color="rgba(0,240,255,0.18)"/>
-      <stop offset="60%" stop-color="rgba(124,58,237,0.06)"/>
-      <stop offset="100%" stop-color="rgba(10,10,15,0)"/>
+
+    <!-- Nebula radial gradients -->
+    <radialGradient id="nebulaPlasma" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF1E70" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#FF1E70" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FF1E70" stop-opacity="0"/>
     </radialGradient>
-    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+    <radialGradient id="nebulaAurora" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00E0D5" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#00E0D5" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00E0D5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulaDeep" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B1C7A" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#8B1C7A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Halftone dot pattern -->
+    <pattern id="halftone" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="0.7" fill="#FFFFFF" fill-opacity="0.05"/>
+    </pattern>
+
+    <!-- Tech grid -->
+    <pattern id="techGrid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#FFFFFF" stroke-opacity="0.03" stroke-width="1"/>
+    </pattern>
+
+    <!-- Soft glow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur stdDeviation="6" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Chromatic aberration -->
+    <filter id="chromAb" x="-5%" y="-5%" width="110%" height="110%">
+      <feOffset in="SourceGraphic" dx="-2" dy="0" result="r"/>
+      <feColorMatrix in="r" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0" result="rOnly"/>
+      <feOffset in="SourceGraphic" dx="2" dy="0" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 0 0 0 0.88  0 0 0 0 0.83  0 0 0 0.55 0" result="bOnly"/>
+      <feMerge>
+        <feMergeNode in="rOnly"/>
+        <feMergeNode in="bOnly"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Pill glow -->
+    <filter id="pillGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
 
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#halo)"/>
+  <!-- Void background -->
+  <rect width="1200" height="630" fill="#0A0A0A"/>
 
-  <rect x="0" y="0" width="1200" height="3" fill="url(#text)" opacity="0.85"/>
-  <rect x="0" y="627" width="1200" height="3" fill="url(#text)" opacity="0.55"/>
+  <!-- Tech grid -->
+  <rect width="1200" height="630" fill="url(#techGrid)"/>
 
-  <g transform="translate(96, 138)" filter="url(#glow)">
-    <path d="M 0 0 L 0 90 L 22 90" stroke="#00F0FF" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M 70 0 L 70 90 L 48 90" stroke="#7C3AED" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="35" cy="45" r="7" fill="#00F0FF" opacity="0.95"/>
+  <!-- Nebula circles -->
+  <circle cx="160" cy="160" r="280" fill="url(#nebulaPlasma)"/>
+  <circle cx="1060" cy="500" r="320" fill="url(#nebulaAurora)"/>
+  <circle cx="600" cy="320" r="200" fill="url(#nebulaDeep)"/>
+  <circle cx="900" cy="120" r="150" fill="url(#nebulaPlasma)" opacity="0.5"/>
+  <circle cx="280" cy="540" r="180" fill="url(#nebulaAurora)" opacity="0.45"/>
+
+  <!-- Halftone overlay -->
+  <rect width="1200" height="630" fill="url(#halftone)"/>
+
+  <!-- Spectral accent rules -->
+  <rect x="0" y="0" width="1200" height="3" fill="url(#spectralGrad)"/>
+  <rect x="0" y="627" width="1200" height="3" fill="url(#spectralGrad)" opacity="0.65"/>
+
+  <!-- Bracket monogram -->
+  <g transform="translate(96, 138)" filter="url(#softGlow)">
+    <path d="M 0 0 L 0 90 L 22 90" stroke="#FF1E70" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 70 0 L 70 90 L 48 90" stroke="#00E0D5" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="35" cy="45" r="7" fill="#FF1E70"/>
+    <circle cx="35" cy="45" r="3" fill="#00E0D5"/>
   </g>
 
-  <text x="220" y="216"
-    font-family="'Space Grotesk', 'Inter', sans-serif"
-    font-size="120"
-    font-weight="900"
-    letter-spacing="-6"
-    fill="url(#text)"
-    filter="url(#glow)">grok-install</text>
+  <!-- Hero wordmark with chromatic aberration -->
+  <g filter="url(#chromAb)">
+    <text x="220" y="216"
+      font-family="'Inter', 'Inter Tight', system-ui, sans-serif"
+      font-size="120"
+      font-weight="900"
+      letter-spacing="-6"
+      fill="#FFFFFF">grok-install</text>
+  </g>
 
-  <text x="220" y="288"
-    font-family="'Inter', sans-serif"
-    font-size="34"
+  <!-- Subtitle -->
+  <text x="220" y="280"
+    font-family="'Inter', system-ui, sans-serif"
+    font-size="32"
     font-weight="500"
-    fill="#F5F5F7"
-    letter-spacing="-0.5">The universal standard for Grok-native agents</text>
+    fill="#E8E8EC"
+    letter-spacing="-0.4">Mint personalized AI agents on X. Safety-first.</text>
 
-  <text x="220" y="338"
-    font-family="'Inter', sans-serif"
-    font-size="22"
-    font-weight="400"
-    fill="#8B8B9A">One YAML file. One command. Your agent is live on X.</text>
+  <!-- Mono tagline -->
+  <text x="220" y="328"
+    font-family="'JetBrains Mono', 'IBM Plex Mono', monospace"
+    font-size="18"
+    font-weight="500"
+    letter-spacing="2"
+    fill="#00E0D5">ONE  YAML  ·  ONE  COMMAND  ·  LIVE  ON  X</text>
 
-  <g transform="translate(96, 412)">
-    <rect width="1008" height="142" rx="18" fill="#0F0F15" stroke="#1F1F2A" stroke-width="1.5"/>
-    <circle cx="32" cy="34" r="7"  fill="#FF5F56"/>
-    <circle cx="56" cy="34" r="7"  fill="#FFBD2E"/>
-    <circle cx="80" cy="34" r="7"  fill="#27C93F"/>
-    <text x="112" y="40" font-family="'JetBrains Mono', monospace" font-size="16" fill="#8B8B9A">zsh — grok-install</text>
-    <text x="32" y="86" font-family="'JetBrains Mono', monospace" font-size="22" fill="#00F0FF">$</text>
-    <text x="58" y="86" font-family="'JetBrains Mono', monospace" font-size="22" fill="#F5F5F7">pip install grok-install &amp;&amp; grok-install init my-bot</text>
-    <text x="32" y="120" font-family="'JetBrains Mono', monospace" font-size="20" fill="#00FFA3">✓ Agent live — monitoring @mentions</text>
+  <!-- Terminal panel -->
+  <g transform="translate(96, 400)">
+    <rect width="1008" height="146" rx="14" fill="#0F0F12" stroke="#1F1F26" stroke-width="1.5"/>
+    <!-- Window dots -->
+    <circle cx="32" cy="32" r="6" fill="#FF1E70"/>
+    <circle cx="54" cy="32" r="6" fill="#FFB400"/>
+    <circle cx="76" cy="32" r="6" fill="#00E0D5"/>
+    <text x="108" y="38" font-family="'JetBrains Mono', monospace" font-size="14" fill="#5A5A66">zsh — grok-install</text>
+    <!-- Command -->
+    <text x="32" y="84" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="500" fill="#FF1E70">$</text>
+    <text x="58" y="84" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="500" fill="#F5F5F7">@grok install this</text>
+    <!-- Result line -->
+    <text x="32" y="120" font-family="'JetBrains Mono', monospace" font-size="20" fill="#00E0D5">→ Agent live · monitoring @mentions · owner-consent gated</text>
   </g>
 
-  <g transform="translate(96, 580)">
-    <rect width="160" height="34" rx="17" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)" stroke-width="1"/>
-    <text x="80" y="22" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" fill="#00F0FF">spec v2.13</text>
+  <!-- Status pills -->
+  <g transform="translate(96, 580)" filter="url(#pillGlow)">
+    <!-- Spec pill -->
+    <rect width="170" height="34" rx="17" fill="#0A0A0A" stroke="#FF1E70" stroke-width="1.5"/>
+    <circle cx="20" cy="17" r="4" fill="#FF1E70"/>
+    <text x="34" y="22" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" fill="#FF1E70" letter-spacing="1">SPEC v2.13</text>
 
-    <rect x="180" width="170" height="34" rx="17" fill="rgba(0,255,163,0.08)" stroke="rgba(0,255,163,0.3)" stroke-width="1"/>
-    <text x="265" y="22" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" fill="#00FFA3">Apache 2.0</text>
+    <!-- License pill -->
+    <rect x="186" width="170" height="34" rx="17" fill="#0A0A0A" stroke="#00E0D5" stroke-width="1.5"/>
+    <circle cx="206" cy="17" r="4" fill="#00E0D5"/>
+    <text x="220" y="22" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" fill="#00E0D5" letter-spacing="1">APACHE 2.0</text>
 
-    <rect x="370" width="190" height="34" rx="17" fill="rgba(124,58,237,0.1)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
-    <text x="465" y="22" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" fill="#7C3AED">xAI SDK Native</text>
+    <!-- Native pill -->
+    <rect x="372" width="200" height="34" rx="17" fill="#0A0A0A" stroke="url(#spectralGrad)" stroke-width="1.5"/>
+    <circle cx="392" cy="17" r="4" fill="url(#spectralGrad)"/>
+    <text x="406" y="22" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" fill="#FFFFFF" letter-spacing="1">X-NATIVE  RUNTIME</text>
 
-    <text x="1008" y="22" text-anchor="end" font-family="'Inter', sans-serif" font-size="14" fill="#8B8B9A">agentmindcloud.github.io/grok-install</text>
+    <!-- URL -->
+    <text x="1008" y="22" text-anchor="end" font-family="'Inter', sans-serif" font-size="14" fill="#5A5A66">agentmindcloud.github.io/grok-install</text>
   </g>
 </svg>
