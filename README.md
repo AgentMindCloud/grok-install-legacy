@@ -1,9 +1,18 @@
+<div align="center">
+
+<img src="assets/spectral-hero.svg" alt="grok-install — Spectral edition" width="100%" />
+
 # grok-install
 
-> Mint personalized AI agents on X. Safety-first. Owner-consent updates. Open source.
+### *Mint personalized AI agents on X. Safety-first. Owner-consent updates. Open source.*
 
 [![Built with grok-install](badge.svg)](https://github.com/AgentMindCloud/grok-install)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache_2.0-FF1E70?style=flat-square&labelColor=0A0A0A)](LICENSE)
+[![Spec](https://img.shields.io/badge/spec-v2.13-00E0D5?style=flat-square&labelColor=0A0A0A)](spec/)
+[![Safety](https://img.shields.io/badge/safety-tier_1_floor-FF1E70?style=flat-square&labelColor=0A0A0A)](SAFETY.md)
+[![Visual System](https://img.shields.io/badge/visual-spectral-00E0D5?style=flat-square&labelColor=0A0A0A)](DESIGN_SYSTEM.md)
+
+</div>
 
 ---
 
